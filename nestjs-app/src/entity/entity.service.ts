@@ -1,60 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { CreateEntityDto, UpdateEntityDto } from './entity.dto';
-
-export interface Entity {
-  id: string;
-  name: string;
-  position: { x: number; y: number };
-  active: boolean;
-}
+import { IBaseEntity, IEntity } from './entity.interface';
 
 @Injectable()
 export class EntityService {
-  private entities: Map<string, Entity> = new Map();
-
-  create(createEntityDto: CreateEntityDto): Entity {
-    const entity: Entity = {
+  private entities: Map<string, IEntity> = new Map();
+  
+  createEntity(entityData: Omit<IEntity, 'id'>): IEntity {
+    const entity: IEntity = {
+      ...entityData,
       id: this.generateId(),
-      name: createEntityDto.name,
-      position: createEntityDto.position,
-      active: createEntityDto.active,
     };
     
     this.entities.set(entity.id, entity);
     return entity;
   }
-
-  findAll(): Entity[] {
-    return Array.from(this.entities.values());
-  }
-
-  findOne(id: string): Entity | undefined {
+  
+  getEntity(id: string): IEntity | undefined {
     return this.entities.get(id);
   }
-
-  update(id: string, updateEntityDto: UpdateEntityDto): Entity | undefined {
-    const existingEntity = this.entities.get(id);
-    
-    if (!existingEntity) {
-      return undefined;
-    }
-    
-    const updatedEntity: Entity = {
-      ...existingEntity,
-      ...(updateEntityDto.name !== undefined && { name: updateEntityDto.name }),
-      ...(updateEntityDto.position !== undefined && { position: updateEntityDto.position }),
-      ...(updateEntityDto.active !== undefined && { active: updateEntityDto.active }),
-    };
-    
-    this.entities.set(id, updatedEntity);
-    return updatedEntity;
+  
+  getAllEntities(): IEntity[] {
+    return Array.from(this.entities.values());
   }
-
-  remove(id: string): boolean {
+  
+  updateEntity(id: string, updates: Partial<IEntity>): boolean {
+    const entity = this.entities.get(id);
+    if (!entity) return false;
+    
+    Object.assign(entity, updates);
+    return true;
+  }
+  
+  deleteEntity(id: string): boolean {
     return this.entities.delete(id);
   }
-
+  
   private generateId(): string {
-    return Math.random().toString(36).substring(2, 9);
+    return Math.random().toString(36).substring(2, 15) + 
+           Math.random().toString(36).substring(2, 15);
   }
 }

@@ -1,14 +1,19 @@
 import { Module } from '@nestjs/common';
-import { EntityService } from './entity/entity.service';
-import { PhysicsService } from './physics/physics.service';
-import { EntityController } from './entity/entity.controller';
-import { PhysicsController } from './physics/physics.controller';
-import { ConfigModule } from './config/config.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { EntityModule } from './entity/entity.module';
+import { RoomModule } from './entity/room.module';
+import { PlayerModule } from './entity/player.module';
+import { ObjectModule } from './entity/object.module';
 
 @Module({
-  imports: [ConfigModule],
-  controllers: [EntityController, PhysicsController],
-  providers: [EntityService, PhysicsService],
-  exports: [EntityService, PhysicsService],
+  imports: [
+    EntityModule,
+    RoomModule,
+    PlayerModule,
+    ObjectModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
