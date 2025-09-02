@@ -85,3 +85,8 @@ temp/
 config/local.json
 config/development.json
 config/production.json
+
+# Project documentation and development files
+progress.md
+.roo/
+example-usage.md
