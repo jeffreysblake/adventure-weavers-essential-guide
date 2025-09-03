@@ -35,6 +35,20 @@ export class EntityService {
     return this.entities.delete(id);
   }
   
+  // Method to persist entities (in a real app, this would save to DB)
+  persistEntities(): void {
+    // In a real implementation, we'd serialize and store the entities
+    // For now, just log that persistence is happening
+    console.log('Persisting entities:', Array.from(this.entities.values()).length);
+  }
+  
+  // Method to load persisted entities (in a real app, this would read from DB)
+  loadEntities(): void {
+    // In a real implementation, we'd deserialize and restore the entities
+    // For now, just log that loading is happening
+    console.log('Loading entities');
+  }
+  
   private generateId(): string {
     return Math.random().toString(36).substring(2, 15) + 
            Math.random().toString(36).substring(2, 15);

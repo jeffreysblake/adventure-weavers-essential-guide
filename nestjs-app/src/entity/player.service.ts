@@ -318,4 +318,14 @@ export class PlayerService {
     return `devastating ${base} storm`;
   }
   
+  // Method to persist players (in a real app, this would save to DB)
+  persistPlayers(): void {
+    console.log('Persisting players');
+  }
+  
+  // Method to load persisted players (in a real app, this would read from DB)
+  loadPlayers(): void {
+    console.log('Loading players');
+  }
+  
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Button from '@/components/ui/button';
+import GameEngineExample from '../components/GameEngineExample';
 
 export default function Home() {
   const [count, setCount] = useState(0);
@@ -32,6 +33,18 @@ export default function Home() {
         </div>
 
         <div className="w-full bg-white rounded-xl shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Room Navigation System</h2>
+          <p className="text-gray-600 mb-4">
+            Rooms with relative positioning and connections between them.
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-gray-600">
+            <li>Rooms can be connected in 4 directions (north, south, east, west)</li>
+            <li>Items can be placed within rooms</li>
+            <li>Players can navigate between connected rooms</li>
+          </ul>
+        </div>
+
+        <div className="w-full bg-white rounded-xl shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Configuration Management</h2>
           <p className="text-gray-600 mb-4">YAML/JSON configuration files for easy customization:</p>
           <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto">
@@ -45,6 +58,11 @@ export default function Home() {
   }
 }`}
           </pre>
+        </div>
+
+        <div className="w-full bg-white rounded-xl shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Game Engine Demo</h2>
+          <GameEngineExample />
         </div>
 
         <div className="w-full bg-white rounded-xl shadow-md p-6">

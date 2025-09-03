@@ -150,4 +150,14 @@ export class ObjectService {
     }
   }
   
+  // Method to persist objects (in a real app, this would save to DB)
+  persistObjects(): void {
+    console.log('Persisting objects');
+  }
+  
+  // Method to load persisted objects (in a real app, this would read from DB)
+  loadObjects(): void {
+    console.log('Loading objects');
+  }
+  
 }

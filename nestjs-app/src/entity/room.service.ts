@@ -69,6 +69,16 @@ export class RoomService {
     };
   }
   
+  // Method to persist rooms (in a real app, this would save to DB)
+  persistRooms(): void {
+    console.log('Persisting rooms:', Array.from(this.rooms.values()).length);
+  }
+  
+  // Method to load persisted rooms (in a real app, this would read from DB)
+  loadRooms(): void {
+    console.log('Loading rooms');
+  }
+  
   private generateId(): string {
     return Math.random().toString(36).substring(2, 15) + 
            Math.random().toString(36).substring(2, 15);
