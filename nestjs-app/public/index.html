@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUEST WEAVER - Terminal Interface</title>
+    <link rel="stylesheet" href="/css/terminal.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="terminal-container">
+        <!-- Header -->
+        <div class="terminal-header">
+            <div class="terminal-title">
+                <span class="blinking">●</span>
+                QUEST WEAVER SYSTEM v2.1 - TERMINAL INTERFACE
+                <span class="system-time" id="systemTime"></span>
+            </div>
+            <div class="status-bar">
+                <span class="status-item">STATUS: <span id="gameStatus">READY</span></span>
+                <span class="status-item">PLAYER: <span id="playerName">ANONYMOUS</span></span>
+                <span class="status-item">LOCATION: <span id="currentLocation">NOWHERE</span></span>
+                <span class="status-item">HEALTH: <span id="playerHealth">100</span></span>
+                <span class="status-item">LEVEL: <span id="playerLevel">1</span></span>
+            </div>
+        </div>
+
+        <!-- Main Terminal Display Area -->
+        <div class="terminal-display" id="terminalDisplay">
+            <div class="boot-sequence" id="bootSequence">
+                <div class="boot-line">QUEST WEAVER TERMINAL SYSTEM</div>
+                <div class="boot-line">Initializing narrative engine...</div>
+                <div class="boot-line">Loading game systems...</div>
+                <div class="boot-line">Establishing neural pathways...</div>
+                <div class="boot-line">Calibrating reality matrices...</div>
+                <div class="boot-line">Connection established.</div>
+                <div class="boot-line">Welcome to your adventure.</div>
+                <div class="boot-line separator">========================================</div>
+            </div>
+            
+            <!-- Game Content Area -->
+            <div class="game-content" id="gameContent" style="display: none;">
+                <div class="narrative-section" id="narrativeSection">
+                    <!-- Room descriptions and story content will appear here -->
+                </div>
+                
+                <div class="action-feedback" id="actionFeedback">
+                    <!-- Results of player actions appear here -->
+                </div>
+                
+                <div class="npc-dialogue" id="npcDialogue" style="display: none;">
+                    <!-- NPC conversations appear here -->
+                </div>
+            </div>
+            
+            <!-- Command History -->
+            <div class="command-history" id="commandHistory">
+                <!-- Previous commands and responses scroll here -->
+            </div>
+        </div>
+
+        <!-- Command Input Area -->
+        <div class="terminal-input-area">
+            <div class="input-prompt">
+                <span class="prompt-symbol">[<span id="promptLocation">SYSTEM</span>]></span>
+                <input 
+                    type="text" 
+                    id="commandInput" 
+                    class="command-input" 
+                    autocomplete="off"
+                    placeholder="Enter command..."
+                    maxlength="200"
+                />
+            </div>
+            <div class="input-suggestions" id="inputSuggestions" style="display: none;">
+                <!-- Command suggestions appear here -->
+            </div>
+        </div>
+
+        <!-- Side Panels (can be toggled) -->
+        <div class="side-panel inventory-panel" id="inventoryPanel" style="display: none;">
+            <div class="panel-header">INVENTORY</div>
+            <div class="panel-content" id="inventoryContent">
+                <div class="empty-message">No items</div>
+            </div>
+        </div>
+
+        <div class="side-panel map-panel" id="mapPanel" style="display: none;">
+            <div class="panel-header">LOCATION MAP</div>
+            <div class="panel-content" id="mapContent">
+                <div class="ascii-map" id="asciiMap">
+                    ┌───────────────────┐
+                    │   UNKNOWN AREA    │
+                    │                   │
+                    │        [?]        │
+                    │                   │
+                    └───────────────────┘
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Panel -->
+        <div class="help-panel" id="helpPanel" style="display: none;">
+            <div class="panel-header">AVAILABLE COMMANDS</div>
+            <div class="panel-content">
+                <div class="command-group">
+                    <div class="command-category">MOVEMENT:</div>
+                    <div class="command-item">north, south, east, west - Move in cardinal directions</div>
+                    <div class="command-item">up, down - Use stairs, ladders, or vertical passages</div>
+                    <div class="command-item">go [location] - Move to a specific location</div>
+                </div>
+                <div class="command-group">
+                    <div class="command-category">INTERACTION:</div>
+                    <div class="command-item">look, examine [item] - Observe surroundings or items</div>
+                    <div class="command-item">take [item], get [item] - Pick up items</div>
+                    <div class="command-item">use [item], open [item] - Use or manipulate items</div>
+                    <div class="command-item">talk [npc], speak [npc] - Converse with characters</div>
+                </div>
+                <div class="command-group">
+                    <div class="command-category">SYSTEM:</div>
+                    <div class="command-item">inventory, i - Show your items</div>
+                    <div class="command-item">map - Display area map</div>
+                    <div class="command-item">save, load - Game state management</div>
+                    <div class="command-item">help - Show this command list</div>
+                    <div class="command-item">clear - Clear terminal display</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="loading-text">PROCESSING...</div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/js/terminal-interface.js"></script>
+    <script src="/js/game-client.js"></script>
+    <script src="/js/narrative-display.js"></script>
+</body>
+</html>

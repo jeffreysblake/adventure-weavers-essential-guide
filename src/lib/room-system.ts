@@ -17,9 +17,11 @@ export interface Room {
   id: string;
   name: string;
   description: string;
+  narrative?: string; // Additional story context for the room
   position: Position;
   size: Size;
   connections: Record<string, Connection>; // key is room ID
+  items?: string[]; // IDs of items in this room
 }
 
 export interface Connection {
@@ -27,6 +29,8 @@ export interface Connection {
   direction: 'north' | 'south' | 'east' | 'west';
   locked?: boolean;
   requiresKey?: string;
+  isDoor?: boolean;
+  canCrawlThrough?: boolean;
 }
 
 export class RoomSystem {
@@ -39,17 +43,21 @@ export class RoomSystem {
     id: string,
     name: string,
     description: string,
-    position: Position,
-    size: Size,
-    connections?: Record<string, Connection>
+    narrative?: string,
+    position: Position = { x: 0, y: 0 },
+    size: Size = { width: 10, height: 10 },
+    connections?: Record<string, Connection>,
+    items?: string[]
   ): Room {
     const room: Room = {
       id,
       name,
       description,
+      narrative,
       position,
       size,
-      connections: connections || {}
+      connections: connections || {},
+      items: items || []
     };
     
     this.rooms.set(id, room);
@@ -64,7 +72,9 @@ export class RoomSystem {
     toRoomId: string,
     direction: 'north' | 'south' | 'east' | 'west',
     locked?: boolean,
-    requiresKey?: string
+    requiresKey?: string,
+    isDoor?: boolean,
+    canCrawlThrough?: boolean
   ): void {
     const fromRoom = this.rooms.get(fromRoomId);
     if (!fromRoom) {
@@ -76,7 +86,9 @@ export class RoomSystem {
       roomId: toRoomId,
       direction,
       locked,
-      requiresKey
+      requiresKey,
+      isDoor,
+      canCrawlThrough
     };
     
     // Add to room's connections
@@ -107,5 +119,22 @@ export class RoomSystem {
    */
   removeRoom(id: string): boolean {
     return this.rooms.delete(id);
+  }
+  
+  /**
+   * Add an item to a room
+   */
+  addItemToRoom(roomId: string, itemId: string): boolean {
+    const room = this.getRoom(roomId);
+    if (!room) return false;
+    
+    if (!room.items) room.items = [];
+    
+    if (!room.items.includes(itemId)) {
+      room.items.push(itemId);
+      return true;
+    }
+    
+    return false; // Item already in room
   }
 }

@@ -1,0 +1,776 @@
+/* Quest Weaver Terminal Interface CSS */
+/* 80s Hacker Terminal Aesthetic */
+
+:root {
+    --terminal-bg: #000000;
+    --terminal-text: #00ff00;
+    --terminal-accent: #00aa00;
+    --terminal-dim: #008800;
+    --terminal-bright: #88ff88;
+    --terminal-border: #004400;
+    --terminal-error: #ff0000;
+    --terminal-warning: #ffaa00;
+    --terminal-info: #0088ff;
+    --scan-line-color: rgba(0, 255, 0, 0.1);
+    --glow-color: #00ff0044;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    background: var(--terminal-bg);
+    color: var(--terminal-text);
+    overflow: hidden;
+    height: 100vh;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 255, 198, 0.3) 0%, transparent 50%);
+    animation: subtle-pulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes subtle-pulse {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.05); }
+}
+
+/* CRT Screen Effect */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(transparent 0%, rgba(0, 255, 0, 0.03) 50%, transparent 100%),
+        linear-gradient(90deg, transparent 0%, rgba(0, 255, 0, 0.03) 50%, transparent 100%);
+    background-size: 100% 4px, 4px 100%;
+    pointer-events: none;
+    z-index: 1000;
+    animation: scan-lines 0.1s linear infinite;
+}
+
+@keyframes scan-lines {
+    0% { background-position: 0 0px, 0 0; }
+    100% { background-position: 0 4px, 0 0; }
+}
+
+/* Terminal Container */
+.terminal-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--terminal-border);
+    margin: 0;
+    background: linear-gradient(180deg, #001100 0%, #000800 100%);
+    box-shadow: 
+        inset 0 0 100px rgba(0, 255, 0, 0.1),
+        0 0 50px rgba(0, 255, 0, 0.2);
+}
+
+/* Terminal Header */
+.terminal-header {
+    background: linear-gradient(180deg, #003300 0%, #001100 100%);
+    border-bottom: 1px solid var(--terminal-accent);
+    padding: 8px 16px;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.terminal-title {
+    font-weight: bold;
+    color: var(--terminal-bright);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.status-bar {
+    display: flex;
+    gap: 20px;
+    font-size: 10px;
+    color: var(--terminal-accent);
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+}
+
+.system-time {
+    font-size: 11px;
+    color: var(--terminal-dim);
+}
+
+/* Blinking Cursor */
+.blinking {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* Terminal Display Area */
+.terminal-display {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.8);
+    font-size: 14px;
+    line-height: 1.4;
+    position: relative;
+}
+
+.terminal-display::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-display::-webkit-scrollbar-track {
+    background: #001100;
+}
+
+.terminal-display::-webkit-scrollbar-thumb {
+    background: var(--terminal-accent);
+    border-radius: 4px;
+}
+
+/* Boot Sequence */
+.boot-sequence {
+    animation: type-in 3s steps(40, end);
+}
+
+.boot-line {
+    margin: 2px 0;
+    color: var(--terminal-accent);
+}
+
+.boot-line.separator {
+    color: var(--terminal-dim);
+    margin: 8px 0;
+}
+
+@keyframes type-in {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* Game Content Sections */
+.narrative-section {
+    margin: 16px 0;
+    padding: 12px;
+    border-left: 3px solid var(--terminal-accent);
+    background: rgba(0, 40, 0, 0.3);
+    border-radius: 0 4px 4px 0;
+}
+
+.room-description {
+    color: var(--terminal-bright);
+    margin-bottom: 12px;
+    text-shadow: 0 0 5px var(--glow-color);
+}
+
+.room-items, .room-npcs, .room-exits {
+    margin: 8px 0;
+    color: var(--terminal-text);
+}
+
+.action-feedback {
+    margin: 8px 0;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.action-success {
+    background: rgba(0, 255, 0, 0.1);
+    border-left: 3px solid var(--terminal-text);
+}
+
+.action-failure {
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid var(--terminal-error);
+    color: var(--terminal-error);
+}
+
+.action-info {
+    background: rgba(0, 136, 255, 0.1);
+    border-left: 3px solid var(--terminal-info);
+    color: var(--terminal-info);
+}
+
+/* NPC Dialogue */
+.npc-dialogue {
+    margin: 12px 0;
+    padding: 12px;
+    background: rgba(0, 0, 40, 0.4);
+    border: 1px solid var(--terminal-info);
+    border-radius: 4px;
+}
+
+.npc-name {
+    color: var(--terminal-warning);
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.npc-speech {
+    color: var(--terminal-bright);
+    margin: 8px 0;
+    font-style: italic;
+}
+
+.dialogue-choices {
+    margin-top: 12px;
+}
+
+.dialogue-choice {
+    display: block;
+    margin: 4px 0;
+    padding: 4px 8px;
+    background: rgba(0, 255, 0, 0.05);
+    border-left: 2px solid var(--terminal-accent);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dialogue-choice:hover {
+    background: rgba(0, 255, 0, 0.1);
+    padding-left: 12px;
+}
+
+/* Command History */
+.command-history {
+    margin-top: 16px;
+}
+
+.command-entry {
+    margin: 4px 0;
+    opacity: 0.8;
+}
+
+.command-input-echo {
+    color: var(--terminal-text);
+}
+
+.command-output {
+    color: var(--terminal-accent);
+    margin-left: 16px;
+}
+
+/* Terminal Input Area */
+.terminal-input-area {
+    background: linear-gradient(180deg, #001100 0%, #003300 100%);
+    border-top: 1px solid var(--terminal-accent);
+    padding: 12px;
+}
+
+.input-prompt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.prompt-symbol {
+    color: var(--terminal-bright);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.command-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--terminal-text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    caret-color: var(--terminal-bright);
+}
+
+.command-input::placeholder {
+    color: var(--terminal-dim);
+}
+
+/* Input Suggestions */
+.input-suggestions {
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(0, 40, 0, 0.8);
+    border: 1px solid var(--terminal-border);
+    border-radius: 4px;
+}
+
+.suggestion-item {
+    padding: 2px 4px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.suggestion-item:hover, .suggestion-item.active {
+    background: rgba(0, 255, 0, 0.1);
+    color: var(--terminal-bright);
+}
+
+/* Side Panels */
+.side-panel {
+    position: fixed;
+    top: 70px;
+    right: -300px;
+    width: 280px;
+    height: calc(100vh - 140px);
+    background: linear-gradient(180deg, #001100 0%, #000800 100%);
+    border: 1px solid var(--terminal-accent);
+    border-right: none;
+    transition: right 0.3s ease;
+    z-index: 200;
+}
+
+.side-panel.active {
+    right: 0;
+}
+
+.panel-header {
+    background: var(--terminal-accent);
+    color: var(--terminal-bg);
+    padding: 8px 12px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.panel-content {
+    padding: 12px;
+    height: calc(100% - 40px);
+    overflow-y: auto;
+    font-size: 12px;
+}
+
+/* Inventory Panel */
+.inventory-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    margin: 2px 0;
+    background: rgba(0, 255, 0, 0.05);
+    border-radius: 2px;
+}
+
+.item-name {
+    color: var(--terminal-bright);
+}
+
+.item-quantity {
+    color: var(--terminal-dim);
+}
+
+/* Map Panel */
+.ascii-map {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 1.2;
+    color: var(--terminal-accent);
+    white-space: pre;
+    text-align: center;
+}
+
+/* Help Panel */
+.help-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    max-height: 80vh;
+    background: linear-gradient(180deg, #001100 0%, #000800 100%);
+    border: 2px solid var(--terminal-accent);
+    border-radius: 8px;
+    z-index: 300;
+    box-shadow: 0 0 50px rgba(0, 255, 0, 0.3);
+}
+
+.command-group {
+    margin: 12px 0;
+}
+
+.command-category {
+    color: var(--terminal-warning);
+    font-weight: bold;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--terminal-border);
+    padding-bottom: 2px;
+}
+
+.command-item {
+    color: var(--terminal-text);
+    margin: 4px 0;
+    padding-left: 8px;
+    border-left: 2px solid var(--terminal-dim);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+}
+
+.loading-spinner {
+    text-align: center;
+}
+
+.spinner-ring {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--terminal-dim);
+    border-top: 3px solid var(--terminal-bright);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: var(--terminal-accent);
+    font-size: 14px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .terminal-container {
+        height: 100vh;
+        margin: 0;
+        border: none;
+    }
+    
+    .side-panel {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .help-panel {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .status-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 9px;
+    }
+}
+
+/* Text Effects */
+.glow-text {
+    text-shadow: 0 0 10px currentColor;
+}
+
+.typewriter {
+    overflow: hidden;
+    border-right: 2px solid var(--terminal-text);
+    white-space: nowrap;
+    animation: typing 2s steps(40, end), blink-caret 1s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: var(--terminal-text); }
+}
+
+/* Special Game Elements */
+.health-bar {
+    display: inline-block;
+    width: 50px;
+    height: 8px;
+    background: var(--terminal-bg);
+    border: 1px solid var(--terminal-text);
+    position: relative;
+    margin-left: 4px;
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--terminal-error) 0%, var(--terminal-warning) 50%, var(--terminal-text) 100%);
+    transition: width 0.3s ease;
+}
+
+.error-text {
+    color: var(--terminal-error);
+    animation: error-flash 0.5s ease-in-out 3;
+}
+
+@keyframes error-flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Narrative Display Enhancements */
+.atmosphere-mysterious {
+    background: rgba(40, 0, 80, 0.2);
+    border-left-color: #8800ff;
+}
+
+.atmosphere-dark {
+    background: rgba(0, 0, 0, 0.5);
+    border-left-color: #666666;
+    color: #cccccc;
+}
+
+.atmosphere-bright {
+    background: rgba(255, 255, 0, 0.1);
+    border-left-color: #ffff00;
+    color: var(--terminal-bright);
+}
+
+.atmosphere-magical {
+    background: rgba(128, 0, 255, 0.15);
+    border-left-color: #ff00ff;
+    color: #ff88ff;
+}
+
+.atmosphere-dangerous {
+    background: rgba(255, 0, 0, 0.15);
+    border-left-color: var(--terminal-error);
+    color: #ffaaaa;
+}
+
+.atmosphere-peaceful {
+    background: rgba(0, 255, 128, 0.1);
+    border-left-color: #00ff80;
+    color: #aaffaa;
+}
+
+.atmosphere-neutral {
+    background: rgba(0, 40, 0, 0.3);
+    border-left-color: var(--terminal-accent);
+}
+
+/* NPC Character Types */
+.npc-friendly {
+    color: #00dd00;
+}
+
+.npc-hostile {
+    color: var(--terminal-error);
+    font-weight: bold;
+}
+
+.npc-mysterious {
+    color: #8800ff;
+    font-style: italic;
+}
+
+.npc-merchant {
+    color: var(--terminal-warning);
+}
+
+.npc-guard {
+    color: #0088ff;
+    font-weight: bold;
+}
+
+.npc-spirit {
+    color: #aaccff;
+    opacity: 0.8;
+    text-shadow: 0 0 8px currentColor;
+}
+
+/* Action Result Types */
+.action-success {
+    background: rgba(0, 255, 0, 0.1);
+    border-left: 3px solid var(--terminal-text);
+    color: var(--terminal-bright);
+}
+
+.action-failure {
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid var(--terminal-error);
+    color: var(--terminal-error);
+}
+
+.action-magical {
+    background: rgba(128, 0, 255, 0.15);
+    border-left: 3px solid #ff00ff;
+    color: #ff88ff;
+    text-shadow: 0 0 5px currentColor;
+}
+
+.action-combat {
+    background: rgba(255, 80, 0, 0.1);
+    border-left: 3px solid #ff5000;
+    color: #ff8040;
+    font-weight: bold;
+}
+
+.action-warning {
+    background: rgba(255, 170, 0, 0.1);
+    border-left: 3px solid var(--terminal-warning);
+    color: var(--terminal-warning);
+}
+
+.action-neutral {
+    background: rgba(0, 40, 0, 0.3);
+    border-left: 3px solid var(--terminal-accent);
+}
+
+/* Environmental Events */
+.environmental-event {
+    margin: 8px 0;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border-left: 2px solid var(--terminal-accent);
+    animation: fade-in 0.5s ease;
+}
+
+.env-sound {
+    background: rgba(255, 255, 0, 0.1);
+    color: #ffff88;
+}
+
+.env-visual {
+    background: rgba(0, 255, 255, 0.1);
+    color: #88ffff;
+}
+
+.env-weather {
+    background: rgba(128, 128, 255, 0.1);
+    color: #aaaaff;
+}
+
+.env-magic {
+    background: rgba(255, 0, 255, 0.15);
+    color: #ff88ff;
+    text-shadow: 0 0 5px currentColor;
+}
+
+.env-danger {
+    background: rgba(255, 0, 0, 0.15);
+    color: #ffaaaa;
+    font-weight: bold;
+    animation: pulse-red 1s ease-in-out infinite;
+}
+
+.env-discovery {
+    background: rgba(0, 255, 128, 0.1);
+    color: #88ff88;
+    font-weight: bold;
+}
+
+.event-prefix {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-red {
+    0%, 100% { background: rgba(255, 0, 0, 0.15); }
+    50% { background: rgba(255, 0, 0, 0.25); }
+}
+
+.pulse-effect {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* Enhanced Inventory */
+.inventory-item.enhanced {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 6px 8px;
+}
+
+.item-main {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 2px;
+}
+
+.item-details {
+    font-size: 10px;
+    display: flex;
+    gap: 8px;
+    opacity: 0.8;
+}
+
+.condition-excellent { color: #00ff00; }
+.condition-good { color: #88ff88; }
+.condition-worn { color: #ffff00; }
+.condition-damaged { color: #ff8800; }
+.condition-broken { color: #ff0000; }
+
+.rarity-common { border-left: 2px solid #888888; }
+.rarity-uncommon { border-left: 2px solid #00ff00; }
+.rarity-rare { border-left: 2px solid #0088ff; }
+.rarity-epic { border-left: 2px solid #8800ff; }
+.rarity-legendary { border-left: 2px solid #ff8800; }
+
+.item-enchanted {
+    color: #ff00ff;
+    text-shadow: 0 0 3px currentColor;
+}
+
+/* Enhanced Map */
+.map-header {
+    color: var(--terminal-warning);
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--terminal-border);
+    padding-bottom: 4px;
+}
+
+.enhanced-map {
+    color: var(--terminal-accent);
+    margin: 8px 0;
+}
+
+.map-legend {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--terminal-dim);
+}
+
+.map-legend div {
+    margin: 2px 0;
+    padding-left: 4px;
+}
+}

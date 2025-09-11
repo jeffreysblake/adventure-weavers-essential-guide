@@ -159,5 +159,10 @@ export class ObjectService {
   loadObjects(): void {
     console.log('Loading objects');
   }
+
+  // Missing methods for game service compatibility
+  updateObjectPosition(objectId: string, newPosition: { x: number; y: number; z: number }): boolean {
+    return this.updateObject(objectId, { position: newPosition });
+  }
   
 }

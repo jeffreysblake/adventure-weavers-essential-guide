@@ -38,6 +38,7 @@ describe('Room System', () => {
       'room1',
       'Test Room',
       'A test room for our system',
+      'A test room narrative',
       { x: 0, y: 0 },
       { width: 100, height: 100 }
     );

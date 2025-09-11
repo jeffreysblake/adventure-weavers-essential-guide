@@ -25,6 +25,7 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+narrative_and_interaction_tests.md
 
 # Runtime data
 pids

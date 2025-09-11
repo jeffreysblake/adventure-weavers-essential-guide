@@ -8,7 +8,10 @@ export interface ISpatialRelationship {
 }
 
 export interface IObject extends IEntity {
+  description?: string;
   objectType: 'item' | 'furniture' | 'weapon' | 'consumable' | 'container';
+  canTake?: boolean;
+  material?: string;
   properties?: {
     weight?: number;
     value?: number;
@@ -24,6 +27,10 @@ export interface IObject extends IEntity {
     isOpen?: boolean;
     isLocked?: boolean;
     isActive?: boolean;
+    isOnFire?: boolean;
+    frozen?: boolean;
+    brittle?: boolean;
+    destroyed?: boolean;
   };
   materialProperties?: IMaterialProperties;
   currentEffects?: IPhysicsEffect[];

@@ -78,6 +78,40 @@ export class RoomService {
   loadRooms(): void {
     console.log('Loading rooms');
   }
+
+  // Missing methods for game service compatibility
+  getObjectsInRoom(roomId: string): any[] {
+    const room = this.rooms.get(roomId);
+    if (!room) return [];
+    
+    return room.objects.map(objectId => 
+      this.entityService.getEntity(objectId)
+    ).filter(Boolean);
+  }
+
+  removeObjectFromRoom(roomId: string, objectId: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+    
+    const index = room.objects.indexOf(objectId);
+    if (index > -1) {
+      room.objects.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  removePlayerFromRoom(roomId: string, playerId: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+    
+    const index = room.players.indexOf(playerId);
+    if (index > -1) {
+      room.players.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
   
   private generateId(): string {
     return Math.random().toString(36).substring(2, 15) + 

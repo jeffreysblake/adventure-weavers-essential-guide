@@ -327,5 +327,43 @@ export class PlayerService {
   loadPlayers(): void {
     console.log('Loading players');
   }
+
+  // Missing methods for game service compatibility
+  movePlayer(playerId: string, newPosition: { x: number; y: number; z: number }): boolean {
+    return this.updatePlayer(playerId, { position: newPosition });
+  }
+
+  addToInventory(playerId: string, itemId: string): boolean {
+    const player = this.getPlayer(playerId);
+    if (!player) return false;
+    
+    if (!player.inventory.includes(itemId)) {
+      player.inventory.push(itemId);
+      return this.updatePlayer(playerId, { inventory: player.inventory });
+    }
+    return true;
+  }
+
+  removeFromInventory(playerId: string, itemId: string): boolean {
+    const player = this.getPlayer(playerId);
+    if (!player) return false;
+    
+    const index = player.inventory.indexOf(itemId);
+    if (index > -1) {
+      player.inventory.splice(index, 1);
+      return this.updatePlayer(playerId, { inventory: player.inventory });
+    }
+    return false;
+  }
+
+  getInventory(playerId: string): any[] {
+    const player = this.getPlayer(playerId);
+    if (!player) return [];
+    
+    // Return actual objects instead of just IDs
+    return player.inventory.map(itemId => 
+      this.objectService.getObject(itemId)
+    ).filter(Boolean);
+  }
   
 }
