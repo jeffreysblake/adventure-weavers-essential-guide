@@ -1,7 +1,7 @@
 {
-  "name": "questweaver",
+  "name": "adventure-weavers-essential-guide",
   "version": "1.0.0",
-  "description": "Interactive story engine with physics, component system, auto-generated images and text output from NPCs",
+  "description": "Adventure Weaver's Essential Guide",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
