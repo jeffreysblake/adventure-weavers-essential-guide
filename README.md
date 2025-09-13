@@ -1,8 +1,25 @@
 # Quest Weaver - Game Engine
 
-This is a comprehensive game engine built using NestJS for managing rooms, players, and objects in a text-based adventure environment with integrated physics and magic systems.
+## The Story Behind Quest Weaver
 
-## Features Implemented
+This project began during a period of remote work where I found myself traveling for several months, missing the joy of reading stories aloud to my nephews every week. As a child, I had countless adventures with text-based games that sparked my imagination and creativity. Wanting to recreate those experiences for my own nephews, I drew inspiration from Neal Stephenson's "The Diamond Age: Or, A Young Lady's Illustrated Primer" - a work that explores how interactive narratives can be crafted through technology.
+
+I set out to build a text-based game engine that would let kids have the same kind of immersive storytelling experiences I enjoyed as a child. The goal was to create something flexible enough for both parents and children to contribute their own ideas, while maintaining some core elements that make stories memorable.
+
+The original vision required technologies that weren't available at the time - but now, in the age of "vibe coding" where context is everything, I've "uplifted" this codebase with modern technologies. 
+
+## What This Engine Provides
+
+I've transformed Quest Weaver into a powerful platform for creating interactive, text-based adventures tailored to your family's unique stories and preferences. The engine combines:
+
+- **Flexible Storytelling**: Create immersive narratives that adapt to player choices
+- **Smart Content Generation**: AI-powered content creation using OpenAI or Anthropic models  
+- **Rich Physics System**: Realistic material interactions and spell effects
+- **Modular Architecture**: Easily extendable with new features and capabilities
+
+This is more than just a game engine - it's a tool for families to create meaningful, interactive experiences together. Whether you're looking to build educational adventures, entertaining stories, or collaborative gameplay, Quest Weaver provides the foundation for creating something truly special.
+
+## Core Features
 
 1. **Entity Management System**
    - Base entity interface with common properties (id, name, position, type)
@@ -102,7 +119,7 @@ The physics engine enables realistic magical interactions:
    curl -X POST http://localhost:3000/players \
      -H "Content-Type: application/json" \
      -d '{"name":"Hero","health":100}'
-   
+     
    # Create a wooden chest
    curl -X POST http://localhost:3000/objects \
      -H "Content-Type: application/json" \
@@ -128,3 +145,46 @@ npm run test
 npm test game-scenario.spec.ts      # Complete gameplay scenarios
 npm test physics-scenario.spec.ts   # Physics and magic interactions
 ```
+
+## AI Integration
+
+The Quest Weaver engine supports integration with AI models to help create and manage your games. You can use either OpenAI or Anthropic models for enhanced capabilities.
+
+### Configuration
+
+To enable AI features, set the following environment variables:
+
+```bash
+# For OpenAI
+export OPENAI_API_KEY="your-openai-api-key"
+export OPENAI_MODEL="gpt-4o-mini"
+
+# For Anthropic  
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+export ANTHROPIC_MODEL="claude-3-haiku-20240307"
+```
+
+### Features
+
+When configured with AI models, the engine provides:
+
+1. **Automated Game Creation** - Generate rooms, objects, and NPCs using natural language prompts
+2. **Smart Content Generation** - Create detailed game content based on your specifications  
+3. **Context-Aware Narratives** - Generate immersive storytelling that adapts to player actions
+4. **Physics-Based Interactions** - AI-powered simulation of realistic material interactions
+
+### Usage Examples
+
+```bash
+# Create a room with AI assistance
+curl -X POST http://localhost:3000/rooms \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Mystic Forest","description":"A magical forest with glowing plants"}'
+
+# Generate an object using AI
+curl -X POST http://localhost:3000/objects \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Enchanted Sword","objectType":"weapon","materialProperties":{"material":"metal"}}'
+```
+
+The engine will automatically use the configured AI provider for content generation when available.
