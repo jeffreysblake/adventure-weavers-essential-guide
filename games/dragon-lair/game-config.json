@@ -1,0 +1,22 @@
+{
+  "id": "dragon-lair-epic",
+  "name": "Dragon's Lair Epic Adventure",
+  "description": "A comprehensive adventure through multiple realms to face an ancient dragon and claim the legendary Crown of Power",
+  "version": 1,
+  "metadata": {
+    "difficulty": "hard",
+    "estimated_playtime": "2-3 hours",
+    "themes": ["adventure", "fantasy", "combat", "exploration"],
+    "starting_room": "village-square",
+    "victory_conditions": [
+      {
+        "type": "obtain_item",
+        "item_id": "crown-of-power",
+        "description": "Claim the Crown of Power from the dragon's treasure vault"
+      }
+    ],
+    "author": "Quest Weaver Test Suite",
+    "created_date": "2025-01-01",
+    "required_level": 5
+  }
+}

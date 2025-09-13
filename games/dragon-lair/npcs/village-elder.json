@@ -1,0 +1,105 @@
+{
+  "id": "village-elder",
+  "name": "Village Elder",
+  "description": "A wise old man with a long white beard and knowing eyes",
+  "npc_type": "quest_giver",
+  "position": { "x": 15, "y": 15, "z": 0 },
+  "health": 50,
+  "max_health": 50,
+  "level": 15,
+  "experience": 0,
+  "inventory_data": ["village-map", "ancient-scroll"],
+  "dialogue_tree_data": {
+    "initial_greeting": {
+      "text": "Welcome, traveler! I sense great destiny in you. The ancient prophecies speak of one who will rise to challenge the dragon and claim the Crown of Power.",
+      "choices": [
+        {
+          "text": "Tell me about the dragon",
+          "leads_to": "dragon_lore"
+        },
+        {
+          "text": "What is the Crown of Power?",
+          "leads_to": "crown_lore"
+        },
+        {
+          "text": "How do I prepare for this quest?",
+          "leads_to": "quest_preparation"
+        },
+        {
+          "text": "I must go now",
+          "leads_to": "farewell"
+        }
+      ]
+    },
+    "dragon_lore": {
+      "text": "The ancient dragon has slept for centuries in the mountain caves beyond the enchanted forest. Its treasure vault contains artifacts of immense power, including the legendary Crown of Power. But beware - the dragon's fire can melt the strongest armor, and its claws can rend stone.",
+      "choices": [
+        {
+          "text": "How do I defeat such a creature?",
+          "leads_to": "dragon_strategy"
+        },
+        {
+          "text": "Where exactly is the dragon's lair?",
+          "leads_to": "lair_directions"
+        },
+        {
+          "text": "What other dangers should I expect?",
+          "leads_to": "other_dangers"
+        }
+      ]
+    },
+    "crown_lore": {
+      "text": "The Crown of Power was forged in the first age by the greatest artificers of all time. It grants the wearer incredible magical abilities and the wisdom of ages. Legends say that whoever possesses it will have the power to unite the kingdoms and bring peace to the land.",
+      "choices": [
+        {
+          "text": "What powers does it grant exactly?",
+          "leads_to": "crown_powers"
+        },
+        {
+          "text": "Why is it in the dragon's hoard?",
+          "leads_to": "crown_history"
+        }
+      ]
+    },
+    "quest_preparation": {
+      "text": "You will need strong weapons and armor from the blacksmith, potions for healing, and magical items from the enchanted forest. Most importantly, you will need courage and wisdom. Take this map - it will guide you on the safest paths.",
+      "actions": [
+        {
+          "type": "give_item",
+          "value": "village-map"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Thank you for the map",
+          "leads_to": "map_thanks"
+        },
+        {
+          "text": "What about magical protection?",
+          "leads_to": "magical_advice"
+        }
+      ]
+    },
+    "farewell": {
+      "text": "May the ancient powers guide and protect you on your journey, brave adventurer. Remember - the fate of all the kingdoms rests in your hands."
+    }
+  },
+  "behavior_config": {
+    "movement_pattern": "stationary",
+    "aggression_level": "peaceful",
+    "trade_enabled": false,
+    "quest_giver": true,
+    "always_available": true,
+    "respawn_on_death": false
+  },
+  "attributes": {
+    "wisdom": 20,
+    "intelligence": 18,
+    "charisma": 16,
+    "strength": 8,
+    "agility": 6,
+    "constitution": 10,
+    "magical_knowledge": 25,
+    "ancient_lore": 30
+  }
+}

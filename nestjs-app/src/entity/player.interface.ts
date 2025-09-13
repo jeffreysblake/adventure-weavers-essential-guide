@@ -5,4 +5,5 @@ export interface IPlayer extends IEntity {
   inventory: any[];
   level: number;
   experience: number;
+  gameId?: string;
 }

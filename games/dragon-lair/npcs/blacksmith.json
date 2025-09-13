@@ -1,0 +1,103 @@
+{
+  "id": "village-blacksmith", 
+  "name": "Gareth the Blacksmith",
+  "description": "A burly man with muscled arms and soot-stained apron, working tirelessly at his forge",
+  "npc_type": "vendor",
+  "position": { "x": 15, "y": 10, "z": 0 },
+  "health": 120,
+  "max_health": 120,
+  "level": 8,
+  "experience": 0,
+  "inventory_data": ["iron-sword", "dragon-scale-armor", "steel-shield", "repair-hammer"],
+  "dialogue_tree_data": {
+    "initial_greeting": {
+      "text": "Ah, another adventurer! *wipes sweat from brow* I've been working day and night preparing weapons and armor. Word is that someone brave enough might finally challenge the old dragon. You look like you might be that someone.",
+      "choices": [
+        {
+          "text": "I need equipment for dragon hunting",
+          "leads_to": "dragon_equipment"
+        },
+        {
+          "text": "What do you recommend for a warrior?",
+          "leads_to": "warrior_gear"
+        },
+        {
+          "text": "Can you repair my equipment?",
+          "leads_to": "repair_services"
+        },
+        {
+          "text": "Tell me about dragon scale armor",
+          "leads_to": "dragon_armor_info"
+        }
+      ]
+    },
+    "dragon_equipment": {
+      "text": "Dragon hunting, eh? *nods approvingly* You'll need my finest work. This iron sword has perfect balance, and I've got dragon scale armor that can withstand the beast's fiery breath. The armor cost me a fortune to acquire those scales, but it's worth every coin for protection like that.",
+      "choices": [
+        {
+          "text": "I'll take the sword and armor",
+          "leads_to": "purchase_premium",
+          "conditions": [{"type": "has_item", "value": "gold-coins"}]
+        },
+        {
+          "text": "Just the sword for now",
+          "leads_to": "purchase_sword"
+        },
+        {
+          "text": "How much for everything?",
+          "leads_to": "pricing_info"
+        }
+      ]
+    },
+    "warrior_gear": {
+      "text": "For a true warrior? *hefts iron sword* This blade here - forged it myself with the finest iron ore from the northern mines. Tempered it in dragon's breath... well, not literally, but close enough! *chuckles* Sharp enough to cut through dragon hide, strong enough to last a hundred battles.",
+      "actions": [
+        {
+          "type": "give_item",
+          "value": "iron-sword"
+        }
+      ],
+      "choices": [
+        {
+          "text": "This sword will serve me well",
+          "leads_to": "sword_accepted"
+        },
+        {
+          "text": "What about armor?",
+          "leads_to": "armor_discussion"
+        }
+      ]
+    },
+    "repair_services": {
+      "text": "Aye, I can fix most anything made of metal. Bring me your damaged gear and I'll have it good as new. My repair work has kept many an adventurer alive in the dark places of the world.",
+      "choices": [
+        {
+          "text": "I'll remember that",
+          "leads_to": "farewell"
+        }
+      ]
+    },
+    "farewell": {
+      "text": "Safe travels, adventurer! May your blade stay sharp and your armor hold strong. Come back if you need anything repaired or if you find any interesting materials in your travels."
+    }
+  },
+  "behavior_config": {
+    "movement_pattern": "stationary",
+    "aggression_level": "peaceful", 
+    "trade_enabled": true,
+    "quest_giver": false,
+    "crafting_services": true,
+    "repair_services": true
+  },
+  "attributes": {
+    "strength": 18,
+    "constitution": 16,
+    "intelligence": 12,
+    "wisdom": 14,
+    "charisma": 11,
+    "agility": 8,
+    "smithing_skill": 25,
+    "metalworking": 30,
+    "business_sense": 15
+  }
+}

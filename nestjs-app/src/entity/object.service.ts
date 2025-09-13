@@ -1,15 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EntityService } from './entity.service';
 import { IObject, ISpatialRelationship } from './object.interface';
+import { DatabaseService } from '../database/database.service';
+import { ObjectData } from '../database/database.interfaces';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ObjectService {
-  constructor(private readonly entityService: EntityService) {}
+  private readonly logger = new Logger(ObjectService.name);
+  private objects: Map<string, IObject> = new Map();
+
+  constructor(
+    private readonly entityService: EntityService,
+    private readonly databaseService?: DatabaseService
+  ) {}
   
   createObject(objectData: Omit<IObject, 'id' | 'type'>): IObject {
-    // Create entity data without ID first
-    const entityData = {
+    // Create object with generated ID
+    const object: IObject = {
       ...objectData,
+      id: uuidv4(),
       type: 'object' as const,
       properties: objectData.properties || {},
       containedObjects: objectData.containedObjects || [],
@@ -18,17 +28,91 @@ export class ObjectService {
       isPortable: objectData.isPortable ?? true,
     };
     
-    // Let EntityService generate the ID and create the entity
-    const entity = this.entityService.createEntity(entityData);
-    return entity as IObject;
+    // Store in local cache
+    this.objects.set(object.id, object);
+    
+    // Also create in EntityService for compatibility
+    this.entityService.createEntity(object);
+    
+    // Save to database if available
+    if (this.databaseService) {
+      this.saveObjectToDatabase(object).catch(error => {
+        this.logger.error(`Failed to save object ${object.id} to database:`, error);
+      });
+    }
+    
+    return object;
   }
   
   getObject(id: string): IObject | undefined {
+    // Check local cache first
+    const object = this.objects.get(id);
+    if (object) {
+      return object;
+    }
+
+    // Fallback to EntityService
     const entity = this.entityService.getEntity(id);
     if (entity && entity.type === 'object') {
       return entity as IObject;
     }
     return undefined;
+  }
+
+  async getObjectWithFallback(id: string, gameId?: string): Promise<IObject | undefined> {
+    // First check local cache
+    let object = this.objects.get(id);
+    if (object) {
+      return object;
+    }
+
+    // Then check EntityService
+    const entity = this.entityService.getEntity(id);
+    if (entity && entity.type === 'object') {
+      object = entity as IObject;
+      this.objects.set(object.id, object);
+      return object;
+    }
+
+    // If not found and database is available, try to load from database
+    if (this.databaseService && gameId) {
+      object = await this.loadObjectFromDatabase(id, gameId);
+      if (object) {
+        this.objects.set(object.id, object);
+        this.entityService.createEntity(object); // Sync with EntityService
+        return object;
+      }
+    }
+
+    return undefined;
+  }
+
+  async getAllObjectsForGame(gameId: string): Promise<IObject[]> {
+    // Get all in-memory objects for this game
+    const inMemoryObjects = Array.from(this.objects.values())
+      .filter(object => object.gameId === gameId);
+
+    // If database is available, also load from database
+    if (this.databaseService) {
+      try {
+        const dbObjects = await this.loadGameObjectsFromDatabase(gameId);
+        
+        // Merge with in-memory objects, preferring in-memory versions
+        const objectMap = new Map<string, IObject>();
+        
+        // Add database objects first
+        dbObjects.forEach(object => objectMap.set(object.id, object));
+        
+        // Override with in-memory objects
+        inMemoryObjects.forEach(object => objectMap.set(object.id, object));
+        
+        return Array.from(objectMap.values());
+      } catch (error) {
+        this.logger.error(`Failed to load objects for game ${gameId} from database:`, error);
+      }
+    }
+
+    return inMemoryObjects;
   }
   
   updateObject(
@@ -150,14 +234,324 @@ export class ObjectService {
     }
   }
   
-  // Method to persist objects (in a real app, this would save to DB)
-  persistObjects(): void {
-    console.log('Persisting objects');
+  // Enhanced persistence methods with database integration
+  async persistObjects(): Promise<void> {
+    if (!this.databaseService) {
+      this.logger.warn('Database service not available for persistence');
+      return;
+    }
+
+    try {
+      const objects = Array.from(this.objects.values());
+      this.logger.log(`Persisting ${objects.length} objects to database`);
+
+      for (const object of objects) {
+        await this.saveObjectToDatabase(object);
+      }
+
+      this.logger.log('Successfully persisted all objects');
+    } catch (error) {
+      this.logger.error('Failed to persist objects:', error);
+      throw error;
+    }
   }
   
-  // Method to load persisted objects (in a real app, this would read from DB)
-  loadObjects(): void {
-    console.log('Loading objects');
+  async loadObjects(gameId?: string): Promise<void> {
+    if (!this.databaseService) {
+      this.logger.warn('Database service not available for loading');
+      return;
+    }
+
+    try {
+      const objects = gameId ? 
+        await this.loadGameObjectsFromDatabase(gameId) : 
+        await this.loadAllObjectsFromDatabase();
+
+      this.logger.log(`Loading ${objects.length} objects from database`);
+
+      // Clear current objects and load from database
+      this.objects.clear();
+      objects.forEach(object => {
+        this.objects.set(object.id, object);
+        this.entityService.createEntity(object); // Sync with EntityService
+      });
+
+      this.logger.log('Successfully loaded objects');
+    } catch (error) {
+      this.logger.error('Failed to load objects:', error);
+      throw error;
+    }
+  }
+
+  // Version management methods
+  async saveObjectVersion(objectId: string, reason?: string): Promise<number> {
+    if (!this.databaseService) {
+      throw new Error('Database service not available for version management');
+    }
+
+    const object = this.objects.get(objectId);
+    if (!object) {
+      throw new Error(`Object ${objectId} not found in memory`);
+    }
+
+    return this.databaseService.saveVersion('object', objectId, object, 'object_service', reason);
+  }
+
+  async getObjectVersion(objectId: string, version?: number): Promise<IObject | null> {
+    if (!this.databaseService) {
+      throw new Error('Database service not available for version management');
+    }
+
+    return this.databaseService.getVersion('object', objectId, version);
+  }
+
+  async rollbackObject(objectId: string, version: number): Promise<boolean> {
+    if (!this.databaseService) {
+      throw new Error('Database service not available for version management');
+    }
+
+    const success = await this.databaseService.rollbackToVersion('object', objectId, version);
+    
+    if (success) {
+      // Reload object from database
+      const object = await this.loadObjectFromDatabase(objectId);
+      if (object) {
+        this.objects.set(objectId, object);
+        this.entityService.updateEntity(objectId, object); // Sync with EntityService
+      }
+    }
+
+    return success;
+  }
+
+  // Dynamic loading for gameplay
+  async loadObjectOnDemand(gameId: string, objectId: string): Promise<IObject | undefined> {
+    // Check if already loaded
+    const existingObject = this.objects.get(objectId);
+    if (existingObject) {
+      return existingObject;
+    }
+
+    // Load from database
+    const object = await this.getObjectWithFallback(objectId, gameId);
+    return object;
+  }
+
+  async refreshObject(gameId: string, objectId: string): Promise<IObject | undefined> {
+    // Force reload from database
+    if (this.databaseService) {
+      const object = await this.loadObjectFromDatabase(objectId, gameId);
+      if (object) {
+        this.objects.set(objectId, object);
+        this.entityService.updateEntity(objectId, object); // Sync with EntityService
+        return object;
+      }
+    }
+    return this.objects.get(objectId);
+  }
+
+  // Clear in-memory cache
+  clearCache(): void {
+    this.objects.clear();
+    this.logger.log('Object cache cleared');
+  }
+
+  // Get cache statistics
+  getCacheStats(): { size: number; objects: string[] } {
+    return {
+      size: this.objects.size,
+      objects: Array.from(this.objects.keys())
+    };
+  }
+
+  // Database integration methods
+  private async saveObjectToDatabase(object: IObject): Promise<void> {
+    if (!this.databaseService) return;
+
+    try {
+      await this.databaseService.transaction(async (db) => {
+        // Convert IObject to ObjectData format for database
+        const objectData: ObjectData = {
+          id: object.id,
+          gameId: object.gameId || 'default',
+          name: object.name,
+          description: object.description,
+          objectType: object.objectType,
+          position: object.position || { x: 0, y: 0, z: 0 },
+          material: object.material,
+          materialProperties: object.materialProperties,
+          weight: object.weight || 0,
+          health: object.health,
+          maxHealth: object.maxHealth,
+          isPortable: object.isPortable ?? true,
+          isContainer: object.isContainer || false,
+          canContain: object.canContain || false,
+          containerCapacity: object.containerCapacity || 0,
+          stateData: object.state,
+          properties: object.properties,
+          version: 1,
+          createdAt: new Date().toISOString()
+        };
+
+        // Save to objects table
+        const insertObject = db.prepare(`
+          INSERT OR REPLACE INTO objects (
+            id, game_id, name, description, object_type, position_x, position_y, position_z,
+            material, material_properties, weight, health, max_health, is_portable, is_container,
+            can_contain, container_capacity, state_data, properties, version, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        insertObject.run(
+          objectData.id, objectData.gameId, objectData.name, objectData.description, objectData.objectType,
+          objectData.position.x, objectData.position.y, objectData.position.z,
+          objectData.material, JSON.stringify(objectData.materialProperties), objectData.weight,
+          objectData.health, objectData.maxHealth, objectData.isPortable, objectData.isContainer,
+          objectData.canContain, objectData.containerCapacity, JSON.stringify(objectData.stateData),
+          JSON.stringify(objectData.properties), objectData.version, objectData.createdAt
+        );
+
+        // Save spatial relationships if they exist
+        if (object.spatialRelationship) {
+          // Clear existing relationships for this object
+          db.prepare('DELETE FROM spatial_relationships WHERE object_id = ?').run(object.id);
+          
+          const insertRelationship = db.prepare(`
+            INSERT INTO spatial_relationships (object_id, target_id, relationship_type, description, created_at)
+            VALUES (?, ?, ?, ?, ?)
+          `);
+
+          insertRelationship.run(
+            object.id,
+            object.spatialRelationship.targetId,
+            object.spatialRelationship.relationshipType,
+            object.spatialRelationship.description,
+            new Date().toISOString()
+          );
+        }
+      });
+
+      // Save version history
+      await this.databaseService.saveVersion('object', object.id, object, 'object_service', 'Object updated');
+
+    } catch (error) {
+      this.logger.error(`Failed to save object ${object.id} to database:`, error);
+      throw error;
+    }
+  }
+
+  private async loadObjectFromDatabase(objectId: string, gameId?: string): Promise<IObject | undefined> {
+    if (!this.databaseService) return undefined;
+
+    try {
+      // Load object from database
+      const objectQuery = this.databaseService.prepare(`
+        SELECT * FROM objects 
+        WHERE id = ? ${gameId ? 'AND game_id = ?' : ''}
+      `);
+      
+      const objectRow = gameId ? 
+        objectQuery.get(objectId, gameId) as any : 
+        objectQuery.get(objectId) as any;
+
+      if (!objectRow) return undefined;
+
+      // Load spatial relationships
+      const relationshipQuery = this.databaseService.prepare(`
+        SELECT * FROM spatial_relationships WHERE object_id = ?
+      `);
+      const relationshipRow = relationshipQuery.get(objectId) as any;
+
+      // Convert database format to IObject
+      const object: IObject = {
+        id: objectRow.id,
+        name: objectRow.name,
+        description: objectRow.description,
+        type: 'object',
+        objectType: objectRow.object_type,
+        position: {
+          x: objectRow.position_x || 0,
+          y: objectRow.position_y || 0,
+          z: objectRow.position_z || 0
+        },
+        material: objectRow.material,
+        materialProperties: objectRow.material_properties ? JSON.parse(objectRow.material_properties) : undefined,
+        weight: objectRow.weight || 0,
+        health: objectRow.health,
+        maxHealth: objectRow.max_health,
+        isPortable: objectRow.is_portable ?? true,
+        isContainer: objectRow.is_container || false,
+        canContain: objectRow.can_contain || false,
+        containerCapacity: objectRow.container_capacity || 0,
+        containedObjects: [], // Would need to be loaded separately
+        state: objectRow.state_data ? JSON.parse(objectRow.state_data) : undefined,
+        properties: objectRow.properties ? JSON.parse(objectRow.properties) : {},
+        gameId: objectRow.game_id
+      };
+
+      // Add spatial relationship if exists
+      if (relationshipRow) {
+        object.spatialRelationship = {
+          targetId: relationshipRow.target_id,
+          relationshipType: relationshipRow.relationship_type,
+          description: relationshipRow.description
+        };
+      }
+
+      return object;
+
+    } catch (error) {
+      this.logger.error(`Failed to load object ${objectId} from database:`, error);
+      return undefined;
+    }
+  }
+
+  private async loadGameObjectsFromDatabase(gameId: string): Promise<IObject[]> {
+    if (!this.databaseService) return [];
+
+    try {
+      const query = this.databaseService.prepare('SELECT * FROM objects WHERE game_id = ?');
+      const rows = query.all(gameId) as any[];
+
+      const objects: IObject[] = [];
+
+      for (const row of rows) {
+        const object = await this.loadObjectFromDatabase(row.id, gameId);
+        if (object) {
+          objects.push(object);
+        }
+      }
+
+      return objects;
+
+    } catch (error) {
+      this.logger.error(`Failed to load objects for game ${gameId} from database:`, error);
+      return [];
+    }
+  }
+
+  private async loadAllObjectsFromDatabase(): Promise<IObject[]> {
+    if (!this.databaseService) return [];
+
+    try {
+      const query = this.databaseService.prepare('SELECT * FROM objects');
+      const rows = query.all() as any[];
+
+      const objects: IObject[] = [];
+
+      for (const row of rows) {
+        const object = await this.loadObjectFromDatabase(row.id);
+        if (object) {
+          objects.push(object);
+        }
+      }
+
+      return objects;
+
+    } catch (error) {
+      this.logger.error('Failed to load all objects from database:', error);
+      return [];
+    }
   }
 
   // Missing methods for game service compatibility

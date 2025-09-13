@@ -1,32 +1,94 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EntityService } from './entity.service';
 import { IRoom } from './room.interface';
+import { DatabaseService } from '../database/database.service';
+import { RoomData } from '../database/database.interfaces';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class RoomService {
+  private readonly logger = new Logger(RoomService.name);
   private rooms: Map<string, IRoom> = new Map();
   
-  constructor(private readonly entityService: EntityService) {}
+  constructor(
+    private readonly entityService: EntityService,
+    private readonly databaseService?: DatabaseService
+  ) {}
   
   createRoom(roomData: Omit<IRoom, 'id' | 'type'>): IRoom {
     const room: IRoom = {
       ...roomData,
       id: this.generateId(),
       type: 'room',
-      objects: [],
-      players: [],
+      objects: roomData.objects || [],
+      players: roomData.players || [],
     };
     
     this.rooms.set(room.id, room);
+    
+    // Save to database if available
+    if (this.databaseService) {
+      this.saveRoomToDatabase(room).catch(error => {
+        this.logger.error(`Failed to save room ${room.id} to database:`, error);
+      });
+    }
+    
     return room;
   }
   
   getRoom(id: string): IRoom | undefined {
     return this.rooms.get(id);
   }
+
+  async getRoomWithFallback(id: string, gameId?: string): Promise<IRoom | undefined> {
+    // First check in-memory cache
+    let room = this.rooms.get(id);
+    if (room) {
+      return room;
+    }
+
+    // If not found and database is available, try to load from database
+    if (this.databaseService && gameId) {
+      room = await this.loadRoomFromDatabase(id, gameId);
+      if (room) {
+        this.rooms.set(room.id, room);
+        return room;
+      }
+    }
+
+    return undefined;
+  }
   
   getAllRooms(): IRoom[] {
     return Array.from(this.rooms.values());
+  }
+
+  async getAllRoomsForGame(gameId: string): Promise<IRoom[]> {
+    // Get all in-memory rooms for this game
+    const inMemoryRooms = Array.from(this.rooms.values())
+      .filter(room => room.gameId === gameId);
+
+    // If database is available, also load from database
+    if (this.databaseService) {
+      try {
+        const dbRooms = await this.loadGameRoomsFromDatabase(gameId);
+        
+        // Merge with in-memory rooms, preferring in-memory versions
+        const roomMap = new Map<string, IRoom>();
+        
+        // Add database rooms first
+        dbRooms.forEach(room => roomMap.set(room.id, room));
+        
+        // Override with in-memory rooms
+        inMemoryRooms.forEach(room => roomMap.set(room.id, room));
+        
+        return Array.from(roomMap.values());
+      } catch (error) {
+        this.logger.error(`Failed to load rooms for game ${gameId} from database:`, error);
+      }
+    }
+
+    return inMemoryRooms;
   }
   
   addPlayerToRoom(roomId: string, playerId: string): boolean {
@@ -69,14 +131,115 @@ export class RoomService {
     };
   }
   
-  // Method to persist rooms (in a real app, this would save to DB)
-  persistRooms(): void {
-    console.log('Persisting rooms:', Array.from(this.rooms.values()).length);
+  // Enhanced persistence methods with database integration
+  async persistRooms(): Promise<void> {
+    if (!this.databaseService) {
+      this.logger.warn('Database service not available for persistence');
+      return;
+    }
+
+    try {
+      const rooms = Array.from(this.rooms.values());
+      this.logger.log(`Persisting ${rooms.length} rooms to database`);
+
+      for (const room of rooms) {
+        await this.saveRoomToDatabase(room);
+      }
+
+      this.logger.log('Successfully persisted all rooms');
+    } catch (error) {
+      this.logger.error('Failed to persist rooms:', error);
+      throw error;
+    }
   }
   
-  // Method to load persisted rooms (in a real app, this would read from DB)
-  loadRooms(): void {
-    console.log('Loading rooms');
+  async loadRooms(gameId?: string): Promise<void> {
+    if (!this.databaseService) {
+      this.logger.warn('Database service not available for loading');
+      return;
+    }
+
+    try {
+      const rooms = gameId ? 
+        await this.loadGameRoomsFromDatabase(gameId) : 
+        await this.loadAllRoomsFromDatabase();
+
+      this.logger.log(`Loading ${rooms.length} rooms from database`);
+
+      // Clear current rooms and load from database
+      this.rooms.clear();
+      rooms.forEach(room => this.rooms.set(room.id, room));
+
+      this.logger.log('Successfully loaded rooms');
+    } catch (error) {
+      this.logger.error('Failed to load rooms:', error);
+      throw error;
+    }
+  }
+
+  // Version management methods
+  async saveRoomVersion(roomId: string, reason?: string): Promise<number> {
+    if (!this.databaseService) {
+      throw new Error('Database service not available for version management');
+    }
+
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      throw new Error(`Room ${roomId} not found in memory`);
+    }
+
+    return this.databaseService.saveVersion('room', roomId, room, 'room_service', reason);
+  }
+
+  async getRoomVersion(roomId: string, version?: number): Promise<IRoom | null> {
+    if (!this.databaseService) {
+      throw new Error('Database service not available for version management');
+    }
+
+    return this.databaseService.getVersion('room', roomId, version);
+  }
+
+  async rollbackRoom(roomId: string, version: number): Promise<boolean> {
+    if (!this.databaseService) {
+      throw new Error('Database service not available for version management');
+    }
+
+    const success = await this.databaseService.rollbackToVersion('room', roomId, version);
+    
+    if (success) {
+      // Reload room from database
+      const room = await this.loadRoomFromDatabase(roomId);
+      if (room) {
+        this.rooms.set(roomId, room);
+      }
+    }
+
+    return success;
+  }
+
+  // Dynamic loading for gameplay
+  async loadRoomOnDemand(gameId: string, roomId: string): Promise<IRoom | undefined> {
+    // Check if already loaded
+    const existingRoom = this.rooms.get(roomId);
+    if (existingRoom) {
+      return existingRoom;
+    }
+
+    // Load from database
+    const room = await this.getRoomWithFallback(roomId, gameId);
+    return room;
+  }
+
+  async refreshRoom(gameId: string, roomId: string): Promise<IRoom | undefined> {
+    // Force reload from database
+    if (this.databaseService) {
+      const room = await this.loadRoomFromDatabase(roomId, gameId);
+      if (room) {
+        this.rooms.set(roomId, room);
+        return room;
+      }
+    }
+    return this.rooms.get(roomId);
   }
 
   // Missing methods for game service compatibility
@@ -113,8 +276,209 @@ export class RoomService {
     return false;
   }
   
+  // Database integration methods
+  private async saveRoomToDatabase(room: IRoom): Promise<void> {
+    if (!this.databaseService) return;
+
+    try {
+      await this.databaseService.transaction(async (db) => {
+        // Convert IRoom to RoomData format for database
+        const roomData: RoomData = {
+          id: room.id,
+          gameId: room.gameId || 'default',
+          name: room.name,
+          description: room.description,
+          longDescription: room.longDescription,
+          position: room.position,
+          width: room.size?.width || room.width || 10,
+          height: room.size?.height || room.height || 10,
+          depth: room.size?.depth || 3,
+          environmentData: room.environment,
+          version: 1,
+          createdAt: new Date().toISOString()
+        };
+
+        // Save to rooms table
+        const insertRoom = db.prepare(`
+          INSERT OR REPLACE INTO rooms (
+            id, game_id, name, description, long_description, position_x, position_y, position_z,
+            width, height, depth, environment_data, version, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        insertRoom.run(
+          roomData.id, roomData.gameId, roomData.name, roomData.description, roomData.longDescription,
+          roomData.position.x, roomData.position.y, roomData.position.z,
+          roomData.width, roomData.height, roomData.depth,
+          JSON.stringify(roomData.environmentData), roomData.version, roomData.createdAt
+        );
+
+        // Save room-object relationships
+        if (room.objects && room.objects.length > 0) {
+          // Clear existing relationships
+          db.prepare('DELETE FROM room_objects WHERE room_id = ?').run(room.id);
+          
+          const insertRoomObject = db.prepare(`
+            INSERT INTO room_objects (room_id, object_id, placed_at)
+            VALUES (?, ?, ?)
+          `);
+
+          for (const objectId of room.objects) {
+            insertRoomObject.run(room.id, objectId, new Date().toISOString());
+          }
+        }
+
+        // Save room-player relationships
+        if (room.players && room.players.length > 0) {
+          // Clear existing relationships
+          db.prepare('DELETE FROM room_npcs WHERE room_id = ?').run(room.id);
+          
+          const insertRoomNpc = db.prepare(`
+            INSERT INTO room_npcs (room_id, npc_id, placed_at)
+            VALUES (?, ?, ?)
+          `);
+
+          for (const playerId of room.players) {
+            insertRoomNpc.run(room.id, playerId, new Date().toISOString());
+          }
+        }
+      });
+
+      // Save version history
+      await this.databaseService.saveVersion('room', room.id, room, 'room_service', 'Room updated');
+
+    } catch (error) {
+      this.logger.error(`Failed to save room ${room.id} to database:`, error);
+      throw error;
+    }
+  }
+
+  private async loadRoomFromDatabase(roomId: string, gameId?: string): Promise<IRoom | undefined> {
+    if (!this.databaseService) return undefined;
+
+    try {
+      // Load room from database
+      const roomQuery = this.databaseService.prepare(`
+        SELECT * FROM rooms 
+        WHERE id = ? ${gameId ? 'AND game_id = ?' : ''}
+      `);
+      
+      const roomRow = gameId ? 
+        roomQuery.get(roomId, gameId) as any : 
+        roomQuery.get(roomId) as any;
+
+      if (!roomRow) return undefined;
+
+      // Load room-object relationships
+      const objectQuery = this.databaseService.prepare(`
+        SELECT object_id FROM room_objects WHERE room_id = ?
+      `);
+      const objectRows = objectQuery.all(roomId) as any[];
+      const objects = objectRows.map(row => row.object_id);
+
+      // Load room-player relationships
+      const playerQuery = this.databaseService.prepare(`
+        SELECT npc_id FROM room_npcs WHERE room_id = ?
+      `);
+      const playerRows = playerQuery.all(roomId) as any[];
+      const players = playerRows.map(row => row.npc_id);
+
+      // Convert database format to IRoom
+      const room: IRoom = {
+        id: roomRow.id,
+        name: roomRow.name,
+        description: roomRow.description,
+        longDescription: roomRow.long_description,
+        type: 'room',
+        position: {
+          x: roomRow.position_x || 0,
+          y: roomRow.position_y || 0,
+          z: roomRow.position_z || 0
+        },
+        width: roomRow.width || 10,
+        height: roomRow.height || 10,
+        size: {
+          width: roomRow.width || 10,
+          height: roomRow.height || 10,
+          depth: roomRow.depth || 3
+        },
+        environment: roomRow.environment_data ? JSON.parse(roomRow.environment_data) : undefined,
+        objects: objects,
+        players: players,
+        gameId: roomRow.game_id
+      };
+
+      return room;
+
+    } catch (error) {
+      this.logger.error(`Failed to load room ${roomId} from database:`, error);
+      return undefined;
+    }
+  }
+
+  private async loadGameRoomsFromDatabase(gameId: string): Promise<IRoom[]> {
+    if (!this.databaseService) return [];
+
+    try {
+      const query = this.databaseService.prepare('SELECT * FROM rooms WHERE game_id = ?');
+      const rows = query.all(gameId) as any[];
+
+      const rooms: IRoom[] = [];
+
+      for (const row of rows) {
+        const room = await this.loadRoomFromDatabase(row.id, gameId);
+        if (room) {
+          rooms.push(room);
+        }
+      }
+
+      return rooms;
+
+    } catch (error) {
+      this.logger.error(`Failed to load rooms for game ${gameId} from database:`, error);
+      return [];
+    }
+  }
+
+  private async loadAllRoomsFromDatabase(): Promise<IRoom[]> {
+    if (!this.databaseService) return [];
+
+    try {
+      const query = this.databaseService.prepare('SELECT * FROM rooms');
+      const rows = query.all() as any[];
+
+      const rooms: IRoom[] = [];
+
+      for (const row of rows) {
+        const room = await this.loadRoomFromDatabase(row.id);
+        if (room) {
+          rooms.push(room);
+        }
+      }
+
+      return rooms;
+
+    } catch (error) {
+      this.logger.error('Failed to load all rooms from database:', error);
+      return [];
+    }
+  }
+
+  // Clear in-memory cache
+  clearCache(): void {
+    this.rooms.clear();
+    this.logger.log('Room cache cleared');
+  }
+
+  // Get cache statistics
+  getCacheStats(): { size: number; rooms: string[] } {
+    return {
+      size: this.rooms.size,
+      rooms: Array.from(this.rooms.keys())
+    };
+  }
+
   private generateId(): string {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15);
+    return uuidv4();
   }
 }

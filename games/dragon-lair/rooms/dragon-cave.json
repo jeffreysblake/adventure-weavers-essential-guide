@@ -1,0 +1,23 @@
+{
+  "id": "dragon-cave",
+  "name": "Dragon's Lair",
+  "description": "The ancient dragon's cave, filled with treasure and danger",
+  "long_description": "Massive bones litter the floor, remnants of the dragon's countless meals over the centuries. Gold gleams in enormous piles throughout the cavern, catching the light from mysterious glowing crystals embedded in the walls. The air is thick with the scent of sulfur and ancient power, and you can feel the weight of centuries pressing down upon you.",
+  "position": { "x": 55, "y": 60, "z": 5 },
+  "size": { "width": 50, "height": 30, "depth": 15 },
+  "environment": {
+    "lighting": "dim crystal glow",
+    "sound": "echoing drips and distant rumbles",
+    "temperature": "warm and humid",
+    "weather": "sulfurous mists",
+    "atmosphere": "ominous and oppressive"
+  },
+  "properties": {
+    "safe_zone": false,
+    "allow_combat": true,
+    "boss_area": true,
+    "treasure_room": true,
+    "fire_resistance_required": true,
+    "ancient_power": true
+  }
+}

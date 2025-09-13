@@ -1,0 +1,69 @@
+{
+  "connections": [
+    {
+      "from_room": "village-square",
+      "to_room": "blacksmith-shop",
+      "direction": "east",
+      "description": "A well-worn cobblestone path leads to the blacksmith's workshop, marked by the rhythmic sound of hammering and the glow of the forge",
+      "is_locked": false,
+      "required_key": null
+    },
+    {
+      "from_room": "blacksmith-shop", 
+      "to_room": "village-square",
+      "direction": "west",
+      "description": "The workshop door opens back to the bustling village square",
+      "is_locked": false,
+      "required_key": null
+    },
+    {
+      "from_room": "village-square",
+      "to_room": "enchanted-forest",
+      "direction": "north",
+      "description": "A forest path disappears into the mysterious woods, where ancient trees seem to whisper secrets to those who listen",
+      "is_locked": false,
+      "required_key": null
+    },
+    {
+      "from_room": "enchanted-forest",
+      "to_room": "village-square", 
+      "direction": "south",
+      "description": "The path leads back through the magical woods to the safety of the village",
+      "is_locked": false,
+      "required_key": null
+    },
+    {
+      "from_room": "enchanted-forest",
+      "to_room": "dragon-cave",
+      "direction": "northeast",
+      "description": "A treacherous mountain path winds upward toward dark caves, with an ominous red glow emanating from within",
+      "is_locked": false,
+      "required_key": null
+    },
+    {
+      "from_room": "dragon-cave",
+      "to_room": "enchanted-forest",
+      "direction": "southwest", 
+      "description": "The cave entrance leads back down the mountain path to the relative safety of the enchanted forest",
+      "is_locked": false,
+      "required_key": null
+    },
+    {
+      "from_room": "dragon-cave",
+      "to_room": "treasure-vault",
+      "direction": "east",
+      "description": "A passage hewn from solid rock leads deeper into the mountain, toward the dragon's most precious treasures",
+      "is_locked": true,
+      "required_key": "dragon-key",
+      "unlock_description": "The massive stone door is sealed with ancient dragon magic, requiring the Dragon Key to open"
+    },
+    {
+      "from_room": "treasure-vault",
+      "to_room": "dragon-cave",
+      "direction": "west",
+      "description": "The passage leads back to the main cavern where the dragon lairs",
+      "is_locked": false,
+      "required_key": null
+    }
+  ]
+}

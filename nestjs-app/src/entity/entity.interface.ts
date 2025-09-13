@@ -1,12 +1,14 @@
 export interface IBaseEntity {
   id: string;
   name: string;
+  description?: string;
   position: {
     x: number;
     y: number;
     z: number;
   };
   type: 'player' | 'object' | 'room';
+  gameId?: string;
 }
 
 export interface IInteractionResult {
@@ -20,5 +22,6 @@ export interface IInteractionResult {
 export interface IEntity extends IBaseEntity {
   health?: number;
   inventory?: any[];
+  gameId?: string;
   interactWith?(other: IEntity): IInteractionResult;
 }

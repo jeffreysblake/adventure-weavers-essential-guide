@@ -1,0 +1,38 @@
+{
+  "id": "village-map",
+  "name": "Village Map",
+  "description": "A hand-drawn map showing local landmarks and paths",
+  "object_type": "quest-item",
+  "position": { "x": 15, "y": 15, "z": 0 },
+  "material": "paper",
+  "material_properties": {
+    "material": "paper",
+    "density": 1,
+    "conductivity": 0,
+    "flammability": 9,
+    "brittleness": 7,
+    "resistances": { "fire": 1, "water": 2, "ice": 8 }
+  },
+  "weight": 0.1,
+  "health": 5,
+  "max_health": 5,
+  "is_portable": true,
+  "is_container": false,
+  "can_contain": false,
+  "container_capacity": 0,
+  "state_data": {
+    "readable": true,
+    "weathered": false
+  },
+  "properties": {
+    "map_type": "regional",
+    "scale": "local_area",
+    "landmarks": ["village_square", "blacksmith_shop", "enchanted_forest", "mountain_path"],
+    "quest_relevance": "navigation_aid"
+  },
+  "interactions": {
+    "examine": "A detailed map of the local area, showing paths to the enchanted forest and mountain regions. Several locations are marked with mysterious symbols.",
+    "take": "You carefully roll up the village map and tuck it into your pack.",
+    "read": "The map reveals safe paths through the enchanted forest and warnings about the dragon's mountain lair."
+  }
+}

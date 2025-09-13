@@ -1,0 +1,43 @@
+{
+  "id": "iron-sword",
+  "name": "Iron Sword",
+  "description": "A well-crafted iron sword with a leather-wrapped hilt",
+  "object_type": "weapon",
+  "position": { "x": 10, "y": 5, "z": 1 },
+  "material": "metal",
+  "material_properties": {
+    "material": "metal",
+    "density": 8,
+    "conductivity": 9,
+    "flammability": 0,
+    "brittleness": 3,
+    "resistances": { "fire": 8, "ice": 6, "lightning": 2, "force": 7 }
+  },
+  "weight": 3,
+  "health": 100,
+  "max_health": 100,
+  "is_portable": true,
+  "is_container": false,
+  "can_contain": false,
+  "container_capacity": 0,
+  "state_data": {
+    "sharp": true,
+    "enchanted": false,
+    "blessed": false
+  },
+  "properties": {
+    "weapon_damage": 15,
+    "attack_speed": "medium",
+    "durability": 100,
+    "enchantment": null,
+    "required_skill": "melee_weapons",
+    "weapon_type": "one_handed_sword",
+    "critical_chance": 0.1
+  },
+  "interactions": {
+    "examine": "A sturdy iron blade with minor nicks from use. The crossguard bears the mark of the village blacksmith, and the leather wrapping on the hilt is worn but secure.",
+    "take": "You pick up the iron sword. It feels well-balanced in your hand, and the weight is comfortable.",
+    "wield": "You ready the iron sword, feeling more confident in battle.",
+    "use": "You swing the sword through the air, testing its weight and balance. The blade cuts cleanly through the air with a satisfying swish."
+  }
+}

@@ -12,6 +12,7 @@ export interface IObject extends IEntity {
   objectType: 'item' | 'furniture' | 'weapon' | 'consumable' | 'container';
   canTake?: boolean;
   material?: string;
+  weight?: number;
   properties?: {
     weight?: number;
     value?: number;
@@ -36,4 +37,5 @@ export interface IObject extends IEntity {
   currentEffects?: IPhysicsEffect[];
   health?: number;
   maxHealth?: number;
+  gameId?: string;
 }

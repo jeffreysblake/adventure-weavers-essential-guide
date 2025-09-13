@@ -1,0 +1,22 @@
+{
+  "id": "blacksmith-shop",
+  "name": "Blacksmith's Shop",
+  "description": "A hot, smoky forge with the ring of hammer on anvil",
+  "long_description": "The ring of hammer on anvil fills the air with rhythmic pounding. Weapons and armor line the walls in organized displays, and a massive forge blazes in the center of the room. The blacksmith works diligently, sweat glistening on his brow as sparks fly from red-hot metal.",
+  "position": { "x": 30, "y": 0, "z": 0 },
+  "size": { "width": 20, "height": 20, "depth": 4 },
+  "environment": {
+    "lighting": "flickering forge light",
+    "sound": "hammering and crackling flames",
+    "temperature": "very hot",
+    "weather": "indoor",
+    "atmosphere": "industrious and intense"
+  },
+  "properties": {
+    "safe_zone": true,
+    "allow_combat": false,
+    "vendor_area": true,
+    "craft_area": true,
+    "fire_hazard": true
+  }
+}

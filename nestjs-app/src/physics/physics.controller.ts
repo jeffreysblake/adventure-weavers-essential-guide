@@ -14,7 +14,8 @@ export class PhysicsController {
    */
   @Post()
   create(@Body() createPhysicsBodyDto: CreatePhysicsBodyDto) {
-    return this.physicsService.create(createPhysicsBodyDto);
+    // TODO: Implement physics body creation
+    return { message: 'Physics body creation not implemented' };
   }
 
   /**
@@ -23,7 +24,8 @@ export class PhysicsController {
    */
   @Get()
   findAll() {
-    return this.physicsService.findAll();
+    // TODO: Implement physics body listing
+    return [];
   }
 
   /**
@@ -33,7 +35,8 @@ export class PhysicsController {
    */
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.physicsService.findOne(id);
+    // TODO: Implement physics body retrieval
+    return null;
   }
 
   /**
@@ -47,7 +50,8 @@ export class PhysicsController {
     @Param('id') id: string,
     @Body() updatePhysicsBodyDto: UpdatePhysicsBodyDto,
   ) {
-    return this.physicsService.update(id, updatePhysicsBodyDto);
+    // TODO: Implement physics body update
+    return { message: 'Physics body update not implemented' };
   }
 
   /**
@@ -57,6 +61,7 @@ export class PhysicsController {
    */
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.physicsService.remove(id);
+    // TODO: Implement physics body removal
+    return { message: 'Physics body removal not implemented' };
   }
 }

@@ -2,6 +2,7 @@ import { IBaseEntity, IEntity } from './entity.interface';
 
 export interface IRoom extends IBaseEntity {
   description?: string;
+  longDescription?: string;
   width: number;
   height: number;
   size: {
@@ -16,4 +17,5 @@ export interface IRoom extends IBaseEntity {
     sound?: string;
     weather?: string;
   };
+  gameId?: string;
 }

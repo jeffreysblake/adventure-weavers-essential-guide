@@ -1,0 +1,22 @@
+{
+  "id": "enchanted-forest",
+  "name": "Enchanted Forest",
+  "description": "A magical forest filled with ancient trees and mystical creatures",
+  "long_description": "Mystical creatures peek from behind massive oak trees whose trunks are wider than houses. A winding path disappears deeper into the forest, and you hear the sound of running water in the distance. The air shimmers with barely visible magic, and flowers of impossible colors bloom in scattered clearings.",
+  "position": { "x": 0, "y": 30, "z": 0 },
+  "size": { "width": 40, "height": 40, "depth": 10 },
+  "environment": {
+    "lighting": "dappled sunlight through canopy",
+    "sound": "rustling leaves and distant water",
+    "temperature": "cool and pleasant",
+    "weather": "mystical mists",
+    "atmosphere": "magical and mysterious"
+  },
+  "properties": {
+    "safe_zone": false,
+    "allow_combat": true,
+    "magical_area": true,
+    "natural_healing": true,
+    "wildlife_present": true
+  }
+}

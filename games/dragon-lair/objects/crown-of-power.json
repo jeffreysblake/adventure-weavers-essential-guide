@@ -1,0 +1,51 @@
+{
+  "id": "crown-of-power",
+  "name": "Crown of Power",
+  "description": "A magnificent crown that radiates magical energy and grants incredible abilities",
+  "object_type": "quest-item",
+  "position": { "x": 12, "y": 12, "z": 3 },
+  "material": "magical_metal",
+  "material_properties": {
+    "material": "magical_metal",
+    "density": 12,
+    "conductivity": 10,
+    "flammability": 0,
+    "brittleness": 1,
+    "resistances": { "fire": 10, "ice": 10, "lightning": 10, "force": 9, "magic": 8 }
+  },
+  "weight": 2,
+  "health": 1000,
+  "max_health": 1000,
+  "is_portable": true,
+  "is_container": false,
+  "can_contain": false,
+  "container_capacity": 0,
+  "state_data": {
+    "magical_active": true,
+    "enchanted": true,
+    "blessed": true,
+    "legendary": true,
+    "quest_complete_item": true
+  },
+  "properties": {
+    "artifact_level": "legendary",
+    "power_rating": 5000,
+    "magical_abilities": [
+      "enhanced_strength",
+      "enhanced_intelligence", 
+      "magical_resistance",
+      "command_authority",
+      "ancient_knowledge"
+    ],
+    "required_level": 10,
+    "attunement_required": true,
+    "curse_protection": true,
+    "divine_blessing": "power_domain"
+  },
+  "interactions": {
+    "examine": "The Crown of Power is a masterwork of ancient craftsmanship. Precious gems of every color are set into bands of gleaming magical metal that seems to shift and flow like liquid starlight. Runes of power circle the crown's base, pulsing with inner fire.",
+    "take": "As your fingers touch the Crown of Power, energy courses through your body. The crown seems to recognize you as worthy, and its weight feels surprisingly comfortable in your hands.",
+    "wear": "You place the Crown of Power upon your head. Immediately, your mind expands with ancient knowledge and your body surges with incredible strength. You have achieved the ultimate goal of your quest!",
+    "touch": "The crown pulses with warm energy at your touch, as if awakening to your presence."
+  }
+}

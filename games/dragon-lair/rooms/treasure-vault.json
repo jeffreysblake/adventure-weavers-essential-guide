@@ -1,0 +1,23 @@
+{
+  "id": "treasure-vault",
+  "name": "Dragon's Treasure Vault",
+  "description": "A chamber filled with legendary treasures and artifacts",
+  "long_description": "Artifacts from ages past shine with their own inner light, casting dancing shadows on the carved stone walls. This is the accumulated wealth of centuries - crowns of forgotten kingdoms, weapons of legendary heroes, and magical items that pulse with otherworldly energy. At the center of the chamber, on a pedestal of black marble, sits the Crown of Power.",
+  "position": { "x": 75, "y": 45, "z": 8 },
+  "size": { "width": 25, "height": 25, "depth": 12 },
+  "environment": {
+    "lighting": "magical artifact glow",
+    "sound": "humming magical energy",
+    "temperature": "cool and dry",
+    "weather": "stable magical field",
+    "atmosphere": "awe-inspiring and sacred"
+  },
+  "properties": {
+    "safe_zone": true,
+    "allow_combat": false,
+    "treasure_room": true,
+    "magical_sanctuary": true,
+    "quest_completion_area": true,
+    "artifact_storage": true
+  }
+}

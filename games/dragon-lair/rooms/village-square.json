@@ -1,0 +1,21 @@
+{
+  "id": "village-square",
+  "name": "Village Square",
+  "description": "A bustling village center with merchants and travelers",
+  "long_description": "Merchants sell their wares while children play nearby. An old sage sits by the fountain, and you notice a blacksmith's shop to the east. The air is filled with the sounds of daily commerce and the scent of fresh bread from the bakery.",
+  "position": { "x": 0, "y": 0, "z": 0 },
+  "size": { "width": 30, "height": 30, "depth": 3 },
+  "environment": {
+    "lighting": "bright daylight",
+    "sound": "bustling marketplace",
+    "temperature": "comfortable",
+    "weather": "clear skies",
+    "atmosphere": "lively and welcoming"
+  },
+  "properties": {
+    "safe_zone": true,
+    "allow_combat": false,
+    "respawn_point": true,
+    "vendor_area": true
+  }
+}
