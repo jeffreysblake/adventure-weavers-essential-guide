@@ -13,13 +13,17 @@ import { LLMController } from './llm.controller';
 import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
 import { EntityModule } from '../entity/entity.module';
-import { PhysicsModule } from '../physics/physics.module';
+import { RoomModule } from '../entity/room.module';
+import { ObjectModule } from '../entity/object.module';
+import { PlayerModule } from '../entity/player.module';
 
 @Global()
 @Module({
   imports: [
     EntityModule,
-    PhysicsModule
+    RoomModule,
+    ObjectModule,
+    PlayerModule
   ],
   controllers: [LLMController],
   providers: [
@@ -50,6 +54,7 @@ import { PhysicsModule } from '../physics/physics.module';
         // Configure OpenAI if API key is available
         if (process.env.OPENAI_API_KEY) {
           providers.push(OpenAIProvider.create(process.env.OPENAI_API_KEY, {
+            baseUrl: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1',
             defaultModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
             timeout: parseInt(process.env.LLM_TIMEOUT || '30000'),
             maxRetries: parseInt(process.env.LLM_MAX_RETRIES || '3')

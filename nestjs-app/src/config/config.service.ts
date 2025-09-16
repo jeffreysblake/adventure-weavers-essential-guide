@@ -7,7 +7,7 @@ export class ConfigService {
 
   // Get configuration values with defaults
   get<T>(key: string, defaultValue?: T): T | undefined {
-    return this.nestConfig.get<T>(key, defaultValue);
+    return this.nestConfig.get(key, defaultValue) as T | undefined;
   }
 
   // Specific configuration getters

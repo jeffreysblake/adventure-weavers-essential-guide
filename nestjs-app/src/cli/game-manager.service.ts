@@ -54,17 +54,19 @@ export class GameManagerService {
         name: gameData.name,
         description: gameData.description || '',
         version: 1,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isActive: true
       };
 
       // Save to database
       await this.databaseService.transaction(async (db) => {
         const insertGame = db.prepare(`
-          INSERT INTO games (id, name, description, version, created_at)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        insertGame.run(game.id, game.name, game.description, game.version, game.createdAt);
+
+        insertGame.run(game.id, game.name, game.description, game.version, game.createdAt, game.updatedAt, game.isActive);
       });
 
       this.logger.log(`Created game: ${game.name} (${game.id})`);
@@ -86,7 +88,9 @@ export class GameManagerService {
         name: row.name,
         description: row.description,
         version: row.version,
-        createdAt: row.created_at
+        createdAt: row.created_at,
+        updatedAt: row.updated_at || row.created_at,
+        isActive: row.is_active !== undefined ? Boolean(row.is_active) : true
       }));
 
     } catch (error) {
@@ -184,7 +188,7 @@ export class GameManagerService {
         case 'object':
           entity = this.objectService.createObject({
             ...baseEntity,
-            objectType: 'misc',
+            objectType: 'item',
             material: 'wood',
             isPortable: true,
             isContainer: false,
@@ -323,7 +327,7 @@ export class GameManagerService {
       const result = await this.gameFileService.loadGameFromFiles(gameId);
       
       if (!result.success) {
-        throw new Error(result.error);
+        throw new Error(result.message);
       }
 
       // Then persist to database

@@ -38,4 +38,5 @@ export interface IObject extends IEntity {
   health?: number;
   maxHealth?: number;
   gameId?: string;
+  roomId?: string;
 }

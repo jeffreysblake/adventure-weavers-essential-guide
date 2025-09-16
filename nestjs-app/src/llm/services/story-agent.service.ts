@@ -47,7 +47,7 @@ interface StoryCreationSession {
   };
 }
 
-interface AgenticDecision {
+export interface AgenticDecision {
   type: 'question' | 'suggestion' | 'action';
   priority: 'low' | 'medium' | 'high' | 'critical';
   description: string;
@@ -134,6 +134,9 @@ export class StoryAgentService {
     this.logger.log(`Started story creation session: ${sessionId} for theme: ${request.theme}`);
 
     const firstDecision = await this.generateNextDecision(sessionId);
+    if (!firstDecision) {
+      throw new Error('Failed to generate initial decision for story creation');
+    }
     return { sessionId, firstDecision };
   }
 

@@ -42,7 +42,11 @@ describe('Core Services Tests', () => {
     const roomData = {
       name: 'Test Room',
       width: 10,
-      height: 10
+      height: 10,
+      position: { x: 0, y: 0, z: 0 },
+      size: { width: 10, height: 10, depth: 3 },
+      objects: [],
+      players: []
     };
     
     const result = roomService.createRoom(roomData);

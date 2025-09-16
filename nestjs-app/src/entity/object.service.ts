@@ -114,9 +114,47 @@ export class ObjectService {
 
     return inMemoryObjects;
   }
+
+  // Alias for compatibility
+  findAll(): IObject[] {
+    return Array.from(this.objects.values());
+  }
+
+  // Alias for compatibility
+  findById(id: string): IObject | undefined {
+    return this.getObject(id);
+  }
+
+  // Alias for compatibility
+  create(objectData: Omit<IObject, 'id' | 'type'>): IObject {
+    return this.createObject(objectData);
+  }
+
+  // Place an object in a room
+  placeInRoom(objectId: string, roomId: string): boolean {
+    const object = this.getObject(objectId);
+    if (!object) {
+      return false;
+    }
+
+    // Update object's position/location
+    object.roomId = roomId;
+
+    // Update in local cache
+    this.objects.set(objectId, object);
+
+    // Update in EntityService
+    this.entityService.updateEntity(objectId, object);
+
+    return true;
+  }
   
+  update(id: string, updates: Partial<IObject>): boolean {
+    return this.updateObject(id, updates);
+  }
+
   updateObject(
-    id: string, 
+    id: string,
     updates: Partial<Omit<IObject, 'id' | 'type'>>
   ): boolean {
     const object = this.getObject(id);
@@ -379,7 +417,14 @@ export class ObjectService {
           objectType: object.objectType,
           position: object.position || { x: 0, y: 0, z: 0 },
           material: object.material,
-          materialProperties: object.materialProperties,
+          materialProperties: object.materialProperties ? {
+            material: String(object.materialProperties.material),
+            density: object.materialProperties.density || 1,
+            conductivity: object.materialProperties.conductivity || 0,
+            flammability: object.materialProperties.flammability || 0,
+            brittleness: object.materialProperties.brittleness || 0,
+            resistances: object.materialProperties.resistances
+          } : undefined,
           weight: object.weight || 0,
           health: object.health,
           maxHealth: object.maxHealth,
@@ -558,5 +603,12 @@ export class ObjectService {
   updateObjectPosition(objectId: string, newPosition: { x: number; y: number; z: number }): boolean {
     return this.updateObject(objectId, { position: newPosition });
   }
-  
+
+  getSpatialRelationships(objectId: string): ISpatialRelationship[] {
+    const object = this.getObject(objectId);
+    if (!object || !object.spatialRelationship) return [];
+
+    return [object.spatialRelationship];
+  }
+
 }

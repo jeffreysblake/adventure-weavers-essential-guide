@@ -63,6 +63,82 @@ export class RoomService {
     return Array.from(this.rooms.values());
   }
 
+  // Alias for compatibility
+  findAll(): IRoom[] {
+    return this.getAllRooms();
+  }
+
+  // Alias for compatibility
+  findById(id: string): IRoom | undefined {
+    return this.getRoom(id);
+  }
+
+  // Alias for compatibility
+  create(roomData: Omit<IRoom, 'id' | 'type'>): IRoom {
+    return this.createRoom(roomData);
+  }
+
+  // Connect two rooms
+  connectRooms(room1Id: string, room2Id: string, direction: string): boolean {
+    const room1 = this.rooms.get(room1Id);
+    const room2 = this.rooms.get(room2Id);
+
+    if (!room1 || !room2) {
+      return false;
+    }
+
+    // For now, just add basic connection tracking
+    if (!room1.connections) {
+      room1.connections = {};
+    }
+    if (!room2.connections) {
+      room2.connections = {};
+    }
+
+    room1.connections[direction] = room2Id;
+
+    // Add reverse direction mapping
+    const reverseDirections: { [key: string]: string } = {
+      'north': 'south',
+      'south': 'north',
+      'east': 'west',
+      'west': 'east',
+      'up': 'down',
+      'down': 'up'
+    };
+
+    const reverseDirection = reverseDirections[direction];
+    if (reverseDirection) {
+      room2.connections[reverseDirection] = room1Id;
+    }
+
+    return true;
+  }
+
+  // Update room
+  update(roomId: string, updates: Partial<IRoom>): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return false;
+    }
+
+    // Update the room with new data
+    Object.assign(room, updates);
+
+    // Don't allow changing id or type
+    room.id = roomId;
+    room.type = 'room';
+
+    // Save to database if available
+    if (this.databaseService) {
+      this.saveRoomToDatabase(room).catch(error => {
+        this.logger.error(`Failed to save updated room ${roomId} to database:`, error);
+      });
+    }
+
+    return true;
+  }
+
   async getAllRoomsForGame(gameId: string): Promise<IRoom[]> {
     // Get all in-memory rooms for this game
     const inMemoryRooms = Array.from(this.rooms.values())
@@ -246,9 +322,18 @@ export class RoomService {
   getObjectsInRoom(roomId: string): any[] {
     const room = this.rooms.get(roomId);
     if (!room) return [];
-    
-    return room.objects.map(objectId => 
+
+    return room.objects.map(objectId =>
       this.entityService.getEntity(objectId)
+    ).filter(Boolean);
+  }
+
+  getPlayersInRoom(roomId: string): any[] {
+    const room = this.rooms.get(roomId);
+    if (!room) return [];
+
+    return room.players.map(playerId =>
+      this.entityService.getEntity(playerId)
     ).filter(Boolean);
   }
 

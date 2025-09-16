@@ -7,9 +7,13 @@ export interface VersionInfo {
   id: number;
   entityType: string;
   entityId: string;
+  version: number;
   versionNumber: number;
+  created_by?: string;
   changedBy?: string;
+  reason?: string;
   changeReason?: string;
+  created_at: string;
   createdAt: string;
 }
 
@@ -22,21 +26,34 @@ export interface DatabaseTransaction {
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
   private database: Database.Database;
-  private readonly dbPath: string;
+  private dbPath: string;
 
-  constructor(customDbPath?: string) {
-    if (customDbPath) {
-      this.dbPath = customDbPath;
+  private customDbPath?: string;
+
+  constructor() {
+    // Initialize with default path, can be overridden for testing
+    this.updateDbPath();
+  }
+
+  private updateDbPath(): void {
+    if (this.customDbPath) {
+      this.dbPath = this.customDbPath;
     } else {
       // Create data directory if it doesn't exist
       const dataDir = path.join(process.cwd(), 'data');
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
-      
+
       this.dbPath = path.join(dataDir, 'quest_weaver.db');
     }
     this.logger.log(`Database path: ${this.dbPath}`);
+  }
+
+  // Method for tests to set custom database path
+  setDatabasePath(path: string): void {
+    this.customDbPath = path;
+    this.updateDbPath();
   }
 
   async onModuleInit() {
@@ -381,13 +398,25 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     const results = this.database
       .prepare(`
         SELECT id, entity_type, entity_id, version_number, changed_by, change_reason, created_at
-        FROM version_history 
+        FROM version_history
         WHERE entity_type = ? AND entity_id = ?
         ORDER BY version_number DESC
       `)
-      .all(entityType, entityId) as VersionInfo[];
+      .all(entityType, entityId) as any[];
 
-    return results;
+    return results.map(row => ({
+      id: row.id,
+      entityType: row.entity_type,
+      entityId: row.entity_id,
+      version: row.version_number,
+      versionNumber: row.version_number,
+      created_by: row.changed_by,
+      changedBy: row.changed_by,
+      reason: row.change_reason,
+      changeReason: row.change_reason,
+      created_at: row.created_at,
+      createdAt: row.created_at,
+    }));
   }
 
   async rollbackToVersion(

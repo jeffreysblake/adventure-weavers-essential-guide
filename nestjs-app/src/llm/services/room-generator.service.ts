@@ -114,7 +114,7 @@ export class RoomGeneratorService {
       {
         existingRoom: JSON.stringify(context.room, null, 2),
         enhancements: JSON.stringify(enhancements, null, 2),
-        currentObjects: context.objects?.map(obj => obj.name).join(', ') || 'none'
+        currentObjects: context.objects?.map(obj => obj.object.name).join(', ') || 'none'
       }
     );
 
@@ -196,7 +196,12 @@ export class RoomGeneratorService {
     const room = this.roomService.create({
       name: content.name,
       description: content.description,
-      position: { x: 0, y: 0, z: 0 }
+      position: { x: 0, y: 0, z: 0 },
+      width: 10,
+      height: 10,
+      size: { width: 10, height: 10, depth: 3 },
+      objects: [],
+      players: []
     });
 
     for (const objData of content.objects || []) {
@@ -206,10 +211,14 @@ export class RoomGeneratorService {
           description: objData.description,
           position: room.position,
           material: objData.material as any,
-          canOpen: objData.canOpen,
-          capacity: objData.capacity || 1,
-          weight: objData.weight || 1,
-          flammability: objData.flammability || 0
+          objectType: 'item' as const,
+          state: {
+            isOpen: objData.canOpen !== undefined ? !objData.canOpen : undefined
+          },
+          containerCapacity: objData.capacity || 1,
+          properties: {
+            weight: objData.weight || 1
+          }
         });
 
         this.objectService.placeInRoom(object.id, room.id);
@@ -230,8 +239,7 @@ export class RoomGeneratorService {
         this.roomService.connectRooms(
           currentRoom.id,
           nextRoom.id,
-          this.getRandomDirection(),
-          `Path leading to ${nextRoom.name}`
+          this.getRandomDirection()
         );
       } catch (error) {
         this.logger.warn(`Failed to connect rooms ${currentRoom.id} -> ${nextRoom.id}: ${error.message}`);
@@ -256,10 +264,14 @@ export class RoomGeneratorService {
           description: objData.description,
           position: room.position,
           material: objData.material as any,
-          canOpen: objData.canOpen,
-          capacity: objData.capacity || 1,
-          weight: objData.weight || 1,
-          flammability: objData.flammability || 0
+          objectType: 'item' as const,
+          state: {
+            isOpen: objData.canOpen !== undefined ? !objData.canOpen : undefined
+          },
+          containerCapacity: objData.capacity || 1,
+          properties: {
+            weight: objData.weight || 1
+          }
         });
 
         this.objectService.placeInRoom(object.id, room.id);

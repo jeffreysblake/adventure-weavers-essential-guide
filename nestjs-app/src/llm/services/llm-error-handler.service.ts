@@ -173,7 +173,7 @@ export class LLMErrorHandlerService {
         lastFailureTime = now;
         successCount = 0;
         
-        if (failureCount >= options.failureThreshold && state !== 'open') {
+        if (failureCount >= options.failureThreshold && state === 'closed') {
           state = 'open';
           this.logger.error(`Circuit breaker opened after ${failureCount} failures`);
         }

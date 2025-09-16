@@ -2,6 +2,9 @@ import { IRoom } from '../../entity/room.interface';
 import { IObject } from '../../entity/object.interface';
 import { IPlayer } from '../../entity/player.interface';
 
+// Conflict resolution types
+export type ConflictType = 'physics' | 'narrative' | 'balance' | 'logic' | 'gameplay' | 'player_action' | 'npc_behavior' | 'object_state' | 'world_consistency';
+
 // Core LLM interfaces
 export interface LLMProvider {
   name: string;
@@ -353,12 +356,25 @@ export interface LLMHookResponse {
 
 // Conflict resolution interfaces
 export interface ConflictResolution {
-  conflictType: string;
-  affectedEntities: string[];
-  proposedSolutions: Solution[];
-  narrativeExplanation: string;
+  conflictType: ConflictType;
+  success: boolean;
+  resolution: string;
+  explanation: string;
+  appliedChanges: string[];
+  sideEffects: string[];
+  alternativeSolutions: AlternativeSolution[];
+  narrativeDescription: string;
   confidence: number;
+  processingTime: number;
+  requiresPlayerConfirmation: boolean;
   metadata?: Record<string, any>;
+}
+
+export interface AlternativeSolution {
+  description: string;
+  explanation: string;
+  pros?: string[];
+  cons?: string[];
 }
 
 export interface Solution {

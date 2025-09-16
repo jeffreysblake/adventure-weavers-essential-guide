@@ -131,7 +131,7 @@ export class NPCGeneratorService {
       'npc_dialogue',
       {
         npcName: npc.name,
-        npcPersonality: gameContext.npc?.type || 'friendly',
+        npcPersonality: gameContext?.npc?.type || 'friendly',
         topic,
         situation: context.situation || 'casual conversation',
         roomDescription: context.roomId ? this.roomService.findById(context.roomId)?.description : 'unknown location'
@@ -174,6 +174,10 @@ export class NPCGeneratorService {
     }
 
     const context = await this.contextBuilderService.buildNPCContext(npcId);
+    if (!context) {
+      throw new Error(`NPC ${npcId} not found for enhancement`);
+    }
+
     const enhancementPrompt = await this.promptTemplateService.renderTemplate(
       'npc_enhancement',
       {
@@ -204,7 +208,7 @@ export class NPCGeneratorService {
     if (request.roomId) {
       const roomContext = await this.contextBuilderService.buildRoomContext(request.roomId);
       context.room = roomContext.room;
-      context.existingNPCs = roomContext.players?.filter(p => p.type !== 'player') || [];
+      context.existingNPCs = roomContext.npcs || [];
     }
 
     if (request.relationships) {
@@ -270,7 +274,9 @@ export class NPCGeneratorService {
       position,
       health: content.stats.health,
       maxHealth: content.stats.health,
-      type: 'npc'
+      level: 1,
+      experience: 0,
+      inventory: []
     });
 
     if (request.roomId) {

@@ -257,7 +257,13 @@ export class LLMCacheService {
         // This would typically involve making actual LLM calls
         // For now, we just create placeholder entries
         const key = this.generateWarmupKey(request);
-        const placeholder = { warmedUp: true, timestamp: Date.now() };
+        const placeholder: LLMResponse = {
+          content: 'placeholder',
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+          model: 'placeholder',
+          finishReason: 'stop',
+          metadata: { warmedUp: true, timestamp: Date.now() }
+        };
         await this.set(key, placeholder, this.DEFAULT_TTL);
       } catch (error) {
         this.logger.warn(`Failed to warm cache for request: ${error.message}`);

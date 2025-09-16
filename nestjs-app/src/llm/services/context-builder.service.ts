@@ -25,6 +25,8 @@ export interface ContextBuilderOptions {
   maxHistoryItems?: number;
   proximityRadius?: number;
   compressionLevel?: 'none' | 'light' | 'moderate' | 'aggressive';
+  includeHistory?: boolean;
+  maxHistoryEntries?: number;
 }
 
 @Injectable()
@@ -179,7 +181,7 @@ export class ContextBuilderService {
     };
   }
 
-  private async buildRoomContext(roomId: string, options: ContextBuilderOptions): Promise<RoomContext> {
+  async buildRoomContext(roomId: string, options: ContextBuilderOptions = { includeHistory: true, maxHistoryEntries: 10 }): Promise<RoomContext> {
     const room = this.roomService.getRoom(roomId);
     if (!room) {
       throw new Error(`Room not found: ${roomId}`);
@@ -189,7 +191,7 @@ export class ContextBuilderService {
     const roomObjects = await this.roomService.getObjectsInRoom(roomId);
     const objects: ObjectContext[] = [];
 
-    for (const obj of roomObjects.validObjects) {
+    for (const obj of roomObjects) {
       const objectContext = await this.buildObjectContext(obj.id, options);
       if (objectContext) {
         objects.push(objectContext);
@@ -200,7 +202,7 @@ export class ContextBuilderService {
     const roomNPCs = await this.roomService.getPlayersInRoom(roomId);
     const npcs: NPCContext[] = [];
 
-    for (const npc of roomNPCs.validPlayers) {
+    for (const npc of roomNPCs) {
       if (npc.type === 'npc') {
         const npcContext = await this.buildNPCContext(npc.id, options);
         if (npcContext) {
@@ -226,7 +228,7 @@ export class ContextBuilderService {
     };
   }
 
-  private async buildObjectContext(objectId: string, options: ContextBuilderOptions): Promise<ObjectContext | null> {
+  async buildObjectContext(objectId: string, options: ContextBuilderOptions = { includeHistory: true, maxHistoryEntries: 10 }): Promise<ObjectContext | null> {
     const object = this.objectService.getObject(objectId);
     if (!object) {
       return null;
@@ -244,15 +246,20 @@ export class ContextBuilderService {
 
     return {
       object,
-      spatialRelationships: spatialRelationships || [],
+      spatialRelationships: spatialRelationships?.map(rel => ({
+        type: rel.relationshipType,
+        targetId: rel.targetId,
+        description: rel.description || '',
+        stability: 80 // Default stability
+      })) || [],
       interactionHistory,
       significance
     };
   }
 
-  private async buildNPCContext(npcId: string, options: ContextBuilderOptions): Promise<NPCContext | null> {
+  async buildNPCContext(npcId: string, options: ContextBuilderOptions = { includeHistory: true, maxHistoryEntries: 10 }): Promise<NPCContext | null> {
     const npc = this.playerService.getPlayer(npcId);
-    if (!npc || npc.type !== 'npc') {
+    if (!npc) {
       return null;
     }
 
@@ -599,7 +606,7 @@ export class ContextBuilderService {
 
     for (const room of allRooms) {
       const roomObjects = await this.roomService.getObjectsInRoom(room.id);
-      if (roomObjects.validObjects.some(obj => obj.id === objectId)) {
+      if (roomObjects.some(obj => obj.id === objectId)) {
         roomId = room.id;
         break;
       }
@@ -626,7 +633,7 @@ export class ContextBuilderService {
 
     for (const room of allRooms) {
       const roomNPCs = await this.roomService.getPlayersInRoom(room.id);
-      if (roomNPCs.validPlayers.some(player => player.id === npcId)) {
+      if (roomNPCs.some(player => player.id === npcId)) {
         roomId = room.id;
         break;
       }
@@ -648,9 +655,55 @@ export class ContextBuilderService {
       includeNearbyRooms: true,
       includeDetailedObjects: true,
       includeRecentEvents: true,
-      compressionLevel: 'light' // Keep more detail for conflicts
+      compressionLevel: 'light' as const // Keep more detail for conflicts
     };
     
     return this.buildGameContext(gameId, undefined, undefined, enhancedOptions);
+  }
+
+  async buildFullContext(gameId?: string): Promise<GameContext> {
+    // Create a minimal full context for compatibility
+    return {
+      gameInfo: {
+        id: gameId || 'default',
+        name: 'Quest Weaver Game',
+        theme: 'fantasy',
+        genre: 'adventure',
+        description: 'A dynamic text-based adventure game',
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString()
+      },
+      currentScene: {
+        activeRoom: await this.buildRoomContext('default', {}),
+        nearbyRooms: [],
+        recentEvents: [],
+        timeOfDay: 'day',
+        weather: 'clear',
+        atmosphere: 'calm'
+      },
+      playerContext: {
+        player: {} as any,
+        recentActions: [],
+        preferences: {} as any,
+        currentObjectives: [],
+        conversationHistory: [],
+        playStyle: {} as any
+      },
+      worldState: {
+        keyLocations: [],
+        importantNPCs: [],
+        majorItems: [],
+        ongoingQuests: [],
+        worldEvents: [],
+        factions: []
+      },
+      constraints: {
+        physicsRules: [],
+        culturalSettings: {} as any,
+        narrativeGuidelines: {} as any,
+        contentRatings: [],
+        technicalLimitations: []
+      }
+    };
   }
 }

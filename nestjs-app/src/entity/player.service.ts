@@ -65,6 +65,32 @@ export class PlayerService {
     return undefined;
   }
 
+  // Alias for compatibility
+  findById(id: string): IPlayer | undefined {
+    return this.getPlayer(id);
+  }
+
+  create(playerData: Omit<IPlayer, 'id' | 'type'>): IPlayer {
+    return this.createPlayer(playerData);
+  }
+
+  findAll(): IPlayer[] {
+    return Array.from(this.players.values());
+  }
+
+  update(id: string, updates: Partial<IPlayer>): boolean {
+    return this.updatePlayer(id, updates);
+  }
+
+  moveToRoom(playerId: string, roomId: string): boolean {
+    const player = this.getPlayer(playerId);
+    if (!player) return false;
+
+    player.roomId = roomId;
+    this.updatePlayer(playerId, { roomId });
+    return true;
+  }
+
   async getPlayerWithFallback(id: string, gameId?: string): Promise<IPlayer | undefined> {
     // First check local cache
     let player = this.players.get(id);

@@ -1,5 +1,5 @@
 {
-  "name": "nestjs-app",
+  "name": "carbon-age-a-necessary-primer",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/serve-static": "^5.0.3",

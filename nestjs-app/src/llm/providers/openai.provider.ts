@@ -91,12 +91,16 @@ export class OpenAIProvider implements LLMProvider {
   ): Promise<LLMResponse> {
     const messages = this.buildMessages(prompt, options);
     
+    // Use -1 for max_tokens if maxTokens is not specified for LM Studio compatibility
+    const maxTokens = options.maxTokens !== undefined ? options.maxTokens : -1;
+
     const requestBody = {
       model: options.model || this.config.defaultModel!,
       messages,
-      max_tokens: options.maxTokens || 2000,
+      max_tokens: maxTokens,
       temperature: options.temperature ?? 0.7,
       top_p: options.topP ?? 1.0,
+      stream: false, // Ensure stream is disabled
     };
 
     const startTime = Date.now();
@@ -132,12 +136,16 @@ export class OpenAIProvider implements LLMProvider {
     // Use response_format for structured output if available
     const messages = this.buildMessages(prompt, options);
     
+    // Use -1 for max_tokens if maxTokens is not specified for LM Studio compatibility
+    const maxTokens = options.maxTokens !== undefined ? options.maxTokens : -1;
+
     const requestBody = {
       model: options.model || this.config.defaultModel!,
       messages,
-      max_tokens: options.maxTokens || 2000,
+      max_tokens: maxTokens,
       temperature: Math.min(options.temperature ?? 0.7, 0.3), // Lower temp for structured
       top_p: options.topP ?? 1.0,
+      stream: false, // Ensure stream is disabled
       response_format: { type: 'json_object' } // Request JSON format
     };
 

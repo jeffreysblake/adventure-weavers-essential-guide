@@ -193,7 +193,7 @@ export class PhysicsService {
   private handleLightningEffect(target: IObject, effect: IPhysicsEffect, intensity: number): IPhysicsResult {
     const material = target.materialProperties!;
     const conductivity = material.conductivity || 0;
-    const damage = Math.floor(intensity * (conductivity > 5 ? 1.5 : 0.5));
+    let damage = Math.floor(intensity * (conductivity > 5 ? 1.5 : 0.5));
     
     let message = `${target.name} is struck by ${effect.description}`;
     const chainReactions: any[] = [];

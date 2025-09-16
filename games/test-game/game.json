@@ -1,0 +1,7 @@
+{
+  "id": "test-game",
+  "name": "Test Game",
+  "description": "A Quest Weaver adventure game",
+  "version": 1,
+  "connections": {}
+}

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { LLMService } from './llm.service';
 import { PromptTemplateService } from './prompt-template.service';
 import { ContextBuilderService } from './context-builder.service';
-import { PhysicsService } from '../../physics/physics.service';
+import { PhysicsService } from '../../entity/physics.service';
 import { RoomService } from '../../entity/room.service';
 import { PlayerService } from '../../entity/player.service';
 import { ObjectService } from '../../entity/object.service';
@@ -36,6 +36,23 @@ interface ConflictHook {
   triggerConditions: string[];
   priority: number;
   handler: (context: ConflictContext) => Promise<ConflictResolution | null>;
+}
+
+interface ConflictLLMResponse {
+  primary_solution: {
+    action: string;
+    explanation: string;
+    side_effects: string[];
+    reversible: boolean;
+  };
+  alternative_solutions?: {
+    action: string;
+    explanation: string;
+    pros: string[];
+    cons: string[];
+  }[];
+  narrative_description: string;
+  consistency_notes: string;
 }
 
 @Injectable()
@@ -315,7 +332,7 @@ export class ConflictResolverService {
     }
 
     // Convert LLM response to ConflictResolution
-    const llmResponse = response.parsedContent;
+    const llmResponse = response.parsedContent as ConflictLLMResponse;
     const resolution: ConflictResolution = {
       conflictType: context.type,
       success: true,

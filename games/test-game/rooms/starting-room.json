@@ -1,0 +1,15 @@
+{
+  "id": "test-game-start",
+  "name": "Starting Room",
+  "description": "You are in the starting room of your adventure.",
+  "position": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "width": 10,
+  "height": 10,
+  "depth": 3,
+  "objects": [],
+  "npcs": []
+}

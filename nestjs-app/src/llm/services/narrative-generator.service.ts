@@ -63,7 +63,7 @@ interface QuestGenerationRequest {
   prerequisites?: string[];
 }
 
-interface GeneratedQuest {
+export interface GeneratedQuest {
   name: string;
   description: string;
   objectives: Array<{
@@ -230,7 +230,7 @@ export class NarrativeGeneratorService {
       { temperature: 0.9 }
     );
 
-    return response.parsedContent;
+    return response.parsedContent as { twist: string; impact: string; newObjectives: string[]; affectedCharacters: string[]; };
   }
 
   async generateAdaptiveNarrative(
@@ -275,7 +275,7 @@ export class NarrativeGeneratorService {
       { temperature: 0.8 }
     );
 
-    return response.parsedContent;
+    return response.parsedContent as { narrativeResponse: string; consequences: string[]; newStoryElements: any[]; };
   }
 
   private async buildStoryContext(request: StoryGenerationRequest): Promise<any> {

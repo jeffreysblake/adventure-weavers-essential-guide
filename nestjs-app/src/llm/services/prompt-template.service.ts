@@ -136,6 +136,7 @@ export class PromptTemplateService {
       name: 'Room Description Generator',
       description: 'Generate rich descriptions for rooms based on context',
       category: 'generation',
+      version: '1.0.0',
       template: `Generate a vivid description for {{room_name}} in a {{game_theme}} setting.
 
 Room Details:
@@ -179,6 +180,7 @@ Write an immersive description that draws the reader into the space:`,
       name: 'NPC Character Generator',
       description: 'Create detailed NPCs with personalities and backgrounds',
       category: 'generation',
+      version: '1.0.0',
       template: `Create a detailed NPC for {{location}} in a {{game_theme}} setting.
 
 Context:
@@ -240,6 +242,7 @@ Generate a complete NPC with the following JSON structure:
       name: 'Physics Conflict Resolver',
       description: 'Resolve impossible physics scenarios with narrative explanations',
       category: 'conflict_resolution',
+      version: '1.0.0',
       template: `A physics conflict has occurred in {{game_name}}:
 
 Conflict Details:
@@ -304,6 +307,7 @@ Respond with JSON:
       name: 'NPC Dialogue Generator',
       description: 'Generate contextual dialogue for NPCs',
       category: 'generation',
+      version: '1.0.0',
       template: `Generate dialogue for {{npc_name}} in the current situation.
 
 NPC Details:
@@ -366,6 +370,7 @@ Response format:
       name: 'Dynamic Object Generator',
       description: 'Create objects that fit the game world and current context',
       category: 'generation',
+      version: '1.0.0',
       template: `Create a new object for {{location}} in {{game_theme}} setting.
 
 Context:
@@ -440,6 +445,7 @@ Generate object with JSON structure:
       name: 'Room Enhancement Generator',
       description: 'Enhance existing rooms with new elements',
       category: 'enhancement',
+      version: '1.0.0',
       template: `Enhance the existing room with the requested improvements.
 
 Current Room:
@@ -473,6 +479,7 @@ Generate the enhancements using the room content JSON schema, focusing only on t
       name: 'NPC Enhancement Generator',
       description: 'Enhance existing NPCs with new attributes',
       category: 'enhancement',
+      version: '1.0.0',
       template: `Enhance the existing NPC with the requested improvements.
 
 Current NPC:
@@ -502,6 +509,7 @@ Generate the enhanced NPC using the full NPC JSON schema.`,
       name: 'Comprehensive Story Generator',
       description: 'Generate complete story structures with acts, characters, and quests',
       category: 'generation',
+      version: '1.0.0',
       template: `Create a comprehensive {{genre}} story with the theme "{{theme}}".
 
 Story Parameters:
@@ -548,6 +556,7 @@ Generate using the story JSON schema.`,
       name: 'Dynamic Quest Generator',
       description: 'Generate quests with objectives, rewards, and dialogue',
       category: 'generation',
+      version: '1.0.0',
       template: `Create a {{type}} quest with difficulty level {{difficulty}}.
 
 Quest Parameters:
@@ -584,6 +593,7 @@ Generate using the quest JSON schema with complete objectives, rewards, and dial
       name: 'Dynamic Plot Twist Generator',
       description: 'Generate plot twists based on current story state',
       category: 'generation',
+      version: '1.0.0',
       template: `Generate a compelling plot twist for the current story situation.
 
 Current Story State:
@@ -613,6 +623,7 @@ The twist should be impactful but not story-breaking.`,
       name: 'Adaptive Narrative Generator',
       description: 'Generate narrative responses to player actions',
       category: 'generation',
+      version: '1.0.0',
       template: `Generate a narrative response to the player's actions and adapt the story accordingly.
 
 Player Actions:
@@ -647,6 +658,7 @@ The response should feel reactive and personalized to the player's actions.`,
       name: 'Story Content Validator',
       description: 'Validate generated story content for quality and consistency',
       category: 'validation',
+      version: '1.0.0',
       template: `Validate the generated story content for quality, consistency, and gameplay value.
 
 Story Details:
@@ -687,6 +699,7 @@ Provide validation results with specific issues and quality assessment.`,
       name: 'Story Summary Generator',
       description: 'Generate summary of completed story creation',
       category: 'generation',
+      version: '1.0.0',
       template: `Generate a compelling summary of the completed story creation.
 
 Story Details:
