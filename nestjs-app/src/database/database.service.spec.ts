@@ -45,10 +45,10 @@ describe('DatabaseService', () => {
   });
 
   describe('Transaction Management', () => {
-    it('should execute transactions successfully', async () => {
+    it('should execute transactions successfully', () => {
       let executed = false;
-      
-      await service.transaction(async (db) => {
+
+      service.transaction((db) => {
         executed = true;
         const stmt = db.prepare('SELECT 1 as test');
         const result = stmt.get() as any;
@@ -76,7 +76,7 @@ describe('DatabaseService', () => {
 
       // Attempt transaction that should fail
       try {
-        await service.transaction(async (db) => {
+        service.transaction((db) => {
           db.prepare('INSERT INTO test_table (value) VALUES (?)').run('test');
           throw new Error('Test error');
         });
@@ -107,14 +107,14 @@ describe('DatabaseService', () => {
       `).run();
     });
 
-    it('should save entity versions', async () => {
+    it('should save entity versions', () => {
       const testEntity = { id: 'test-1', name: 'Test Entity', type: 'test' };
-      
-      const version = await service.saveVersion(
-        'test', 
-        'test-1', 
-        testEntity, 
-        'test-author', 
+
+      const version = service.saveVersion(
+        'test',
+        'test-1',
+        testEntity,
+        'test-author',
         'Test save'
       );
 
@@ -138,8 +138,8 @@ describe('DatabaseService', () => {
       const entity1 = { id: 'test-1', name: 'Version 1' };
       const entity2 = { id: 'test-1', name: 'Version 2' };
 
-      const v1 = await service.saveVersion('test', 'test-1', entity1, 'author', 'First');
-      const v2 = await service.saveVersion('test', 'test-1', entity2, 'author', 'Second');
+      const v1 = service.saveVersion('test', 'test-1', entity1, 'author', 'First');
+      const v2 = service.saveVersion('test', 'test-1', entity2, 'author', 'Second');
 
       expect(v1).toBe(1);
       expect(v2).toBe(2);
@@ -148,7 +148,7 @@ describe('DatabaseService', () => {
     it('should retrieve specific versions', async () => {
       const entity = { id: 'test-1', name: 'Test Entity', value: 42 };
       
-      await service.saveVersion('test', 'test-1', entity, 'author');
+      service.saveVersion('test', 'test-1', entity, 'author');
       
       const retrieved = await service.getVersion('test', 'test-1', 1);
       expect(retrieved).toEqual(entity);
@@ -158,8 +158,8 @@ describe('DatabaseService', () => {
       const entity1 = { id: 'test-1', name: 'Version 1' };
       const entity2 = { id: 'test-1', name: 'Version 2' };
 
-      await service.saveVersion('test', 'test-1', entity1, 'author');
-      await service.saveVersion('test', 'test-1', entity2, 'author');
+      service.saveVersion('test', 'test-1', entity1, 'author');
+      service.saveVersion('test', 'test-1', entity2, 'author');
 
       const latest = await service.getVersion('test', 'test-1');
       expect(latest).toEqual(entity2);
@@ -169,8 +169,8 @@ describe('DatabaseService', () => {
       const entity1 = { id: 'test-1', name: 'Version 1' };
       const entity2 = { id: 'test-1', name: 'Version 2' };
 
-      await service.saveVersion('test', 'test-1', entity1, 'author', 'First');
-      await service.saveVersion('test', 'test-1', entity2, 'author', 'Second');
+      service.saveVersion('test', 'test-1', entity1, 'author', 'First');
+      service.saveVersion('test', 'test-1', entity2, 'author', 'Second');
 
       const versions = await service.listVersions('test', 'test-1');
       
@@ -194,8 +194,8 @@ describe('DatabaseService', () => {
       const entity2 = { id: 'test-1', name: 'Version 2' };
 
       // Save versions
-      await service.saveVersion('test', 'test-1', entity1, 'author');
-      await service.saveVersion('test', 'test-1', entity2, 'author');
+      service.saveVersion('test', 'test-1', entity1, 'author');
+      service.saveVersion('test', 'test-1', entity2, 'author');
 
       // Insert current state (version 2)
       service.prepare('INSERT OR REPLACE INTO test_entities (id, data) VALUES (?, ?)')

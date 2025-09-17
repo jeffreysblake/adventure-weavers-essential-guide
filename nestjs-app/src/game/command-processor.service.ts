@@ -15,13 +15,18 @@ export class CommandProcessorService {
   ) {}
 
   async processCommand(command: string, playerId: string, gameId: string): Promise<CommandResult> {
+    console.log(`[DEBUG] processCommand called - command: "${command}", playerId: ${playerId}, gameId: ${gameId}`);
+
     const normalizedCommand = command.toLowerCase().trim();
     const parts = normalizedCommand.split(' ');
     const verb = parts[0];
     const target = parts.slice(1).join(' ');
 
+    console.log(`[DEBUG] Parsed command - verb: "${verb}", target: "${target}"`);
+
     const player = this.playerService.getPlayer(playerId);
     if (!player) {
+      console.log(`[DEBUG] Player not found: ${playerId}`);
       return {
         success: false,
         type: 'error',
@@ -29,9 +34,12 @@ export class CommandProcessorService {
       };
     }
 
+    console.log(`[DEBUG] Player found - position: (${player.position.x}, ${player.position.y}, ${player.position.z})`);
+
     // Get current room
     const currentRoom = this.getCurrentRoom(player);
     if (!currentRoom) {
+      console.log(`[DEBUG] Current room not found for player position`);
       return {
         success: false,
         type: 'error',
@@ -39,10 +47,14 @@ export class CommandProcessorService {
       };
     }
 
+    console.log(`[DEBUG] Current room: ${currentRoom.name} at (${currentRoom.position.x}, ${currentRoom.position.y}, ${currentRoom.position.z})`);
+
     try {
+      console.log(`[DEBUG] Processing verb: "${verb}"`);
       switch (verb) {
         case 'look':
         case 'l':
+          console.log(`[DEBUG] Handling look command`);
           return await this.handleLook(player, currentRoom, target);
         
         case 'go':
@@ -105,23 +117,34 @@ export class CommandProcessorService {
   }
 
   private async handleLook(player: any, room: any, target: string): Promise<CommandResult> {
+    console.log(`[DEBUG] handleLook called - player: ${player?.id}, room: ${room?.name}, target: "${target}"`);
+
     if (!target || target === 'around' || target === 'room') {
       // Look at the room
       const objects = this.roomService.getObjectsInRoom(room.id);
+      console.log(`[DEBUG] Found ${objects.length} objects in room ${room.id}`);
       const objectNames = objects.map(obj => obj.name).filter(Boolean);
-      
-      return {
+      console.log(`[DEBUG] Object names: ${objectNames.join(', ')}`);
+
+      const exits = this.getAvailableExits(room);
+      console.log(`[DEBUG] Available exits: ${exits.join(', ')}`);
+
+      const result = {
         success: true,
         type: 'room_description',
         roomDescription: room.description,
         items: objectNames,
-        exits: this.getAvailableExits(room),
+        exits: exits,
         playerStatus: {
           location: room.name
         }
       };
+
+      console.log(`[DEBUG] Returning look result:`, JSON.stringify(result, null, 2));
+      return result;
     } else {
       // Look at specific object
+      console.log(`[DEBUG] Looking at specific object: ${target}`);
       return await this.handleExamine(player, room, target);
     }
   }
@@ -137,20 +160,21 @@ export class CommandProcessorService {
     }
 
     // Simple movement - adjust player position based on direction
+    // Rooms are spaced with 5-unit gaps: Entry Hall (0,0,0), Garden (0,15,0), Library (15,0,0)
     let newPosition = { ...player.position };
-    
+
     switch (direction.toLowerCase()) {
       case 'north':
-        newPosition.y += 10;
+        newPosition.y += 15;  // Move to next room north
         break;
       case 'south':
-        newPosition.y -= 10;
+        newPosition.y -= 15;  // Move to next room south
         break;
       case 'east':
-        newPosition.x += 10;
+        newPosition.x += 15;  // Move to next room east
         break;
       case 'west':
-        newPosition.x -= 10;
+        newPosition.x -= 15;  // Move to next room west
         break;
       case 'up':
         newPosition.z += 1;
@@ -384,11 +408,11 @@ export class CommandProcessorService {
   private isPositionInRoom(position: any, room: any): boolean {
     return (
       position.x >= room.position.x &&
-      position.x <= room.position.x + room.size.width &&
+      position.x < room.position.x + room.size.width &&
       position.y >= room.position.y &&
-      position.y <= room.position.y + room.size.height &&
+      position.y < room.position.y + room.size.height &&
       position.z >= room.position.z &&
-      position.z <= room.position.z + room.size.depth
+      position.z < room.position.z + room.size.depth
     );
   }
 

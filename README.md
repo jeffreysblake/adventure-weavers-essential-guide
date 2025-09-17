@@ -1,6 +1,6 @@
-# Adventure Weaver's Essential Guide
+# The Quest Weaver's Essential Guide
 
-## The Story Behind Adventure Weaver
+## The Story Behind The Quest Weaver
 
 This project began during a period of remote work where I found myself traveling for several months, missing the joy of reading stories aloud to my nephews every week. As a child, I had countless adventures with text-based games that sparked my imagination and creativity. Wanting to recreate those experiences for my own nephews, I drew inspiration from Neal Stephenson's "The Diamond Age: Or, A Young Lady's Illustrated Primer" - a work that explores how interactive narratives can be crafted through technology.
 
@@ -10,14 +10,14 @@ The original vision required technologies that weren't available at the time - b
 
 ## What This Engine Provides
 
-I've transformed Adventure Weaver's Essential Guide into a powerful platform for creating interactive, text-based adventures tailored to your family's unique stories and preferences. The engine combines:
+I've transformed The Quest Weaver's Essential Guide into a powerful platform for creating interactive, text-based adventures tailored to your family's unique stories and preferences. The engine combines:
 
 - **Flexible Storytelling**: Create immersive narratives that adapt to player choices
 - **Smart Content Generation**: AI-powered content creation using OpenAI or Anthropic models  
 - **Rich Physics System**: Realistic material interactions and spell effects
 - **Modular Architecture**: Easily extendable with new features and capabilities
 
-This is more than just a game engine - it's a tool for families to create meaningful, interactive experiences together. Whether you're looking to build educational adventures, entertaining stories, or collaborative gameplay, Adventure Weaver provides the foundation for creating something truly special.
+This is more than just a game engine - it's a tool for families to create meaningful, interactive experiences together. Whether you're looking to build educational adventures, entertaining stories, or collaborative gameplay, The Quest Weaver provides the foundation for creating something truly special.
 
 ## Core Features
 
@@ -148,7 +148,7 @@ npm test physics-scenario.spec.ts   # Physics and magic interactions
 
 ## AI Integration
 
-The Adventure Weaver engine supports integration with AI models to help create and manage your games. You can use either OpenAI or Anthropic models for enhanced capabilities.
+The Quest Weaver engine supports integration with AI models to help create and manage your games. You can use either OpenAI or Anthropic models for enhanced capabilities.
 
 ### Configuration
 

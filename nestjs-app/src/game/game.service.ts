@@ -5,6 +5,7 @@ import { EntityService } from '../entity/entity.service';
 import { RoomService } from '../entity/room.service';
 import { PlayerService } from '../entity/player.service';
 import { ObjectService } from '../entity/object.service';
+import { DatabaseService } from '../database/database.service';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface GameSession {
@@ -46,25 +47,30 @@ export class GameService {
     private roomService: RoomService,
     private playerService: PlayerService,
     private objectService: ObjectService,
+    private databaseService: DatabaseService,
   ) {}
 
   // Create a new game session
   async createGame(): Promise<{ gameId: string; gameState: any }> {
     const gameId = uuidv4();
-    
-    // Create initial player
+
+    // First, save the game record to the database to satisfy foreign key constraints
+    await this.saveGameToDatabase(gameId);
+
+    // Create initial player with gameId
     const player = this.playerService.createPlayer({
       name: 'Adventurer',
       position: { x: 0, y: 0, z: 0 },
       health: 100,
       inventory: [],
       level: 1,
-      experience: 0
+      experience: 0,
+      gameId: gameId
     });
 
     // Load or create initial game world
     await this.initializeGameWorld(gameId);
-    
+
     // Create game session
     const session: GameSession = {
       gameId,
@@ -72,13 +78,13 @@ export class GameService {
       createdAt: new Date(),
       lastActive: new Date()
     };
-    
+
     this.gameSessions.set(gameId, session);
-    
+
     // Get initial game state
     const gameState = await this.gameStateService.getGameState(gameId);
     gameState.player = player;
-    
+
     return { gameId, gameState };
   }
 
@@ -251,7 +257,8 @@ export class GameService {
       height: 10,
       size: { width: 10, height: 10, depth: 3 },
       objects: [],
-      players: []
+      players: [],
+      gameId: gameId
     });
 
     // Create some initial objects
@@ -261,7 +268,8 @@ export class GameService {
       objectType: 'furniture',
       position: { x: 1, y: 1, z: 1 },
       material: 'wood',
-      canTake: false
+      canTake: false,
+      gameId: gameId
     });
 
     const key = this.objectService.createObject({
@@ -270,12 +278,63 @@ export class GameService {
       objectType: 'item',
       position: { x: 5, y: 5, z: 0 },
       material: 'metal',
-      canTake: true
+      canTake: true,
+      gameId: gameId
     });
 
     // Place objects in room
     this.roomService.addObjectToRoom(startingRoom.id, torch.id);
     this.roomService.addObjectToRoom(startingRoom.id, key.id);
+
+    // Create adjacent rooms for movement with clear boundaries
+    const northRoom = this.roomService.createRoom({
+      name: 'Garden',
+      description: 'A peaceful garden with lush greenery and a small fountain in the center.',
+      position: { x: 0, y: 15, z: 0 },
+      width: 10,
+      height: 10,
+      size: { width: 10, height: 10, depth: 3 },
+      objects: [],
+      players: [],
+      gameId: gameId
+    });
+
+    const eastRoom = this.roomService.createRoom({
+      name: 'Library',
+      description: 'A vast library filled with ancient books and scrolls reaching up to the vaulted ceiling.',
+      position: { x: 15, y: 0, z: 0 },
+      width: 10,
+      height: 10,
+      size: { width: 10, height: 10, depth: 3 },
+      objects: [],
+      players: [],
+      gameId: gameId
+    });
+
+    // Create some objects for the new rooms
+    const book = this.objectService.createObject({
+      name: 'Ancient Tome',
+      description: 'A leather-bound book with mysterious symbols etched on its cover.',
+      objectType: 'item',
+      position: { x: 2, y: 3, z: 0 },
+      material: 'paper',
+      canTake: true,
+      gameId: gameId
+    });
+
+    const flower = this.objectService.createObject({
+      name: 'Glowing Flower',
+      description: 'A beautiful flower that emits a soft, ethereal light.',
+      objectType: 'item',
+      position: { x: 5, y: 5, z: 0 },
+      material: 'organic',
+      canTake: true,
+      gameId: gameId
+    });
+
+    // Place objects in their respective rooms
+    this.roomService.addObjectToRoom(eastRoom.id, book.id);
+    this.roomService.addObjectToRoom(northRoom.id, flower.id);
 
     // Save initial state
     await this.gameStateService.updateGameState(gameId, {
@@ -288,11 +347,11 @@ export class GameService {
   private isPlayerInRoom(player: any, room: any): boolean {
     return (
       player.position.x >= room.position.x &&
-      player.position.x <= room.position.x + room.size.width &&
+      player.position.x < room.position.x + room.size.width &&
       player.position.y >= room.position.y &&
-      player.position.y <= room.position.y + room.size.height &&
+      player.position.y < room.position.y + room.size.height &&
       player.position.z >= room.position.z &&
-      player.position.z <= room.position.z + room.size.depth
+      player.position.z < room.position.z + room.size.depth
     );
   }
 
@@ -317,14 +376,53 @@ export class GameService {
   cleanupInactiveSessions(maxInactiveTime: number = 3600000): number { // 1 hour default
     const now = new Date();
     let cleaned = 0;
-    
+
     for (const [gameId, session] of this.gameSessions.entries()) {
       if (now.getTime() - session.lastActive.getTime() > maxInactiveTime) {
         this.gameSessions.delete(gameId);
         cleaned++;
       }
     }
-    
+
     return cleaned;
+  }
+
+  // Save game record to database to satisfy foreign key constraints
+  private async saveGameToDatabase(gameId: string): Promise<void> {
+    if (!this.databaseService) {
+      throw new Error('Database service not available');
+    }
+
+    try {
+      const insertGame = this.databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const now = new Date().toISOString();
+      insertGame.run(
+        gameId,
+        'The Quest Weaver Adventure',
+        'A text-based adventure game created by The Quest Weaver',
+        1,
+        now,
+        now,
+        1  // SQLite uses 1 for true, 0 for false
+      );
+
+      // Save version history
+      this.databaseService.saveVersion('game', gameId, {
+        id: gameId,
+        name: 'The Quest Weaver Adventure',
+        description: 'A text-based adventure game created by The Quest Weaver',
+        version: 1,
+        created_at: now,
+        updated_at: now,
+        is_active: 1
+      }, 'game_service', 'Game created');
+
+    } catch (error) {
+      throw new Error(`Failed to save game ${gameId} to database: ${error.message}`);
+    }
   }
 }

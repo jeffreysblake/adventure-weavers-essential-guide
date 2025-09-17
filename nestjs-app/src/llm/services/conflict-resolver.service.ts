@@ -277,7 +277,7 @@ export class ConflictResolverService {
 
     const gameContext = await this.buildGameContext(context);
     const prompt = await this.promptTemplateService.renderTemplate('physics_conflict_resolution', {
-      game_name: 'Quest Weaver',
+      game_name: 'The Quest Weaver\'s Essential Guide',
       conflict_type: context.type,
       affected_objects: context.affectedEntities.join(', '),
       location: context.location,

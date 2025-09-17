@@ -1,7 +1,7 @@
 {
-  "name": "carbon-age-a-necessary-primer",
+  "name": "the-quest-weavers-essential-guide",
   "version": "0.0.1",
-  "description": "",
+  "description": "The Quest Weaver's Essential Guide - A comprehensive text-based adventure game engine built with NestJS",
   "author": "",
   "private": true,
   "license": "UNLICENSED",

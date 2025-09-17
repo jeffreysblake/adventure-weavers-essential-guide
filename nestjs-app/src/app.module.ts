@@ -22,7 +22,8 @@ import { LLMModule } from './llm/llm.module';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
-      exclude: ['/api*'],
+      exclude: ['/api/*'],
+      serveRoot: '/',
     }),
     DatabaseModule,
     FileSystemModule,

@@ -1,8 +1,8 @@
-# Quest Weaver LLM Integration
+# The Quest Weaver's Essential Guide LLM Integration
 
 ## Overview
 
-The Quest Weaver LLM Integration provides intelligent AI-powered content generation, narrative adaptation, and conflict resolution for the game engine. This comprehensive system allows for dynamic story creation, intelligent NPC behavior, and seamless handling of impossible game states.
+The Quest Weaver's Essential Guide LLM Integration provides intelligent AI-powered content generation, narrative adaptation, and conflict resolution for the game engine. This comprehensive system allows for dynamic story creation, intelligent NPC behavior, and seamless handling of impossible game states.
 
 ## Features
 
@@ -387,4 +387,4 @@ When extending the LLM integration:
 
 ## License
 
-This LLM integration is part of the Quest Weaver project and follows the same licensing terms.
+This LLM integration is part of The Quest Weaver's Essential Guide project and follows the same licensing terms.

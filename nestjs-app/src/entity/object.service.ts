@@ -31,8 +31,8 @@ export class ObjectService {
     // Store in local cache
     this.objects.set(object.id, object);
     
-    // Also create in EntityService for compatibility
-    this.entityService.createEntity(object);
+    // Also register in EntityService for compatibility (preserve existing ID)
+    this.entityService['entities'].set(object.id, object);
     
     // Save to database if available
     if (this.databaseService) {
@@ -79,7 +79,7 @@ export class ObjectService {
       object = await this.loadObjectFromDatabase(id, gameId);
       if (object) {
         this.objects.set(object.id, object);
-        this.entityService.createEntity(object); // Sync with EntityService
+        this.entityService['entities'].set(object.id, object); // Sync with EntityService
         return object;
       }
     }
@@ -113,6 +113,10 @@ export class ObjectService {
     }
 
     return inMemoryObjects;
+  }
+
+  getAllObjects(): IObject[] {
+    return Array.from(this.objects.values());
   }
 
   // Alias for compatibility
@@ -311,7 +315,7 @@ export class ObjectService {
       this.objects.clear();
       objects.forEach(object => {
         this.objects.set(object.id, object);
-        this.entityService.createEntity(object); // Sync with EntityService
+        this.entityService['entities'].set(object.id, object); // Sync with EntityService
       });
 
       this.logger.log('Successfully loaded objects');
@@ -407,7 +411,7 @@ export class ObjectService {
     if (!this.databaseService) return;
 
     try {
-      await this.databaseService.transaction(async (db) => {
+      this.databaseService.transaction((db) => {
         // Convert IObject to ObjectData format for database
         const objectData: ObjectData = {
           id: object.id,
@@ -451,8 +455,8 @@ export class ObjectService {
           objectData.id, objectData.gameId, objectData.name, objectData.description, objectData.objectType,
           objectData.position.x, objectData.position.y, objectData.position.z,
           objectData.material, JSON.stringify(objectData.materialProperties), objectData.weight,
-          objectData.health, objectData.maxHealth, objectData.isPortable, objectData.isContainer,
-          objectData.canContain, objectData.containerCapacity, JSON.stringify(objectData.stateData),
+          objectData.health, objectData.maxHealth, objectData.isPortable ? 1 : 0, objectData.isContainer ? 1 : 0,
+          objectData.canContain ? 1 : 0, objectData.containerCapacity, JSON.stringify(objectData.stateData),
           JSON.stringify(objectData.properties), objectData.version, objectData.createdAt
         );
 
@@ -477,7 +481,7 @@ export class ObjectService {
       });
 
       // Save version history
-      await this.databaseService.saveVersion('object', object.id, object, 'object_service', 'Object updated');
+      this.databaseService.saveVersion('object', object.id, object, 'object_service', 'Object updated');
 
     } catch (error) {
       this.logger.error(`Failed to save object ${object.id} to database:`, error);

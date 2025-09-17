@@ -73,7 +73,7 @@ export class GameFileService {
       const connections = await this.loadConnections(gameId);
 
       // Save to database with versioning
-      await this.saveGameToDatabase(gameData, rooms, objects, npcs, connections);
+      this.saveGameToDatabase(gameData, rooms, objects, npcs, connections);
 
       return {
         success: true,
@@ -284,21 +284,21 @@ export class GameFileService {
     }
   }
 
-  private async saveGameToDatabase(
+  private saveGameToDatabase(
     gameData: GameData | undefined,
     rooms: RoomData[],
     objects: ObjectData[],
     npcs: NPCData[],
     connections: RoomConnection[]
-  ): Promise<void> {
-    await this.databaseService.transaction(async (db) => {
+  ): void {
+    this.databaseService.transaction((db) => {
       // Save game config
       if (gameData) {
         const insertGame = db.prepare(`
           INSERT OR REPLACE INTO games (id, name, description, version, created_at, updated_at, is_active)
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
-        
+
         insertGame.run(
           gameData.id,
           gameData.name,
@@ -309,8 +309,8 @@ export class GameFileService {
           gameData.isActive
         );
 
-        // Save version history
-        await this.databaseService.saveVersion('game', gameData.id, gameData, 'file_loader', 'Loaded from files');
+        // Save version history - call synchronously
+        this.databaseService.saveVersion('game', gameData.id, gameData, 'file_loader', 'Loaded from files');
       }
 
       // Save rooms
@@ -329,7 +329,7 @@ export class GameFileService {
           JSON.stringify(room.environmentData), room.version, room.createdAt
         );
 
-        await this.databaseService.saveVersion('room', room.id, room, 'file_loader', 'Loaded from files');
+        this.databaseService.saveVersion('room', room.id, room, 'file_loader', 'Loaded from files');
       }
 
       // Save objects
@@ -351,7 +351,7 @@ export class GameFileService {
           JSON.stringify(object.properties), object.version, object.createdAt
         );
 
-        await this.databaseService.saveVersion('object', object.id, object, 'file_loader', 'Loaded from files');
+        this.databaseService.saveVersion('object', object.id, object, 'file_loader', 'Loaded from files');
       }
 
       // Save NPCs
@@ -373,7 +373,7 @@ export class GameFileService {
           npc.version, npc.createdAt
         );
 
-        await this.databaseService.saveVersion('npc', npc.id, npc, 'file_loader', 'Loaded from files');
+        this.databaseService.saveVersion('npc', npc.id, npc, 'file_loader', 'Loaded from files');
       }
 
       // Clear existing connections for this game

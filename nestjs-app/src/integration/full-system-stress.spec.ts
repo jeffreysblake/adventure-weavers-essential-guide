@@ -3,7 +3,7 @@ import { EntityService } from '../entity/entity.service';
 import { RoomService } from '../entity/room.service';
 import { ObjectService } from '../entity/object.service';
 import { PlayerService } from '../entity/player.service';
-import { PhysicsService } from '../physics/physics.service';
+import { PhysicsService } from '../entity/physics.service';
 import { DatabaseService } from '../database/database.service';
 import { CLIService } from '../cli/cli.service';
 import { GameManagerService } from '../cli/game-manager.service';

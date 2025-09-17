@@ -11,6 +11,11 @@ export class ObjectController {
     return this.objectService.createObject(objectData);
   }
 
+  @Get()
+  getAllObjects() {
+    return this.objectService.getAllObjects();
+  }
+
   @Get(':id')
   getObject(@Param('id') id: string) {
     return this.objectService.getObject(id);

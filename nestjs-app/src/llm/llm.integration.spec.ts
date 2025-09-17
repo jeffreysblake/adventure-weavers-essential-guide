@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LLMController } from './llm.controller';
 import { LLMModule } from './llm.module';
 import { EntityModule } from '../entity/entity.module';
-import { PhysicsModule } from '../physics/physics.module';
 
 describe('LLM Integration Tests', () => {
   let app: TestingModule;
@@ -16,7 +15,6 @@ describe('LLM Integration Tests', () => {
     app = await Test.createTestingModule({
       imports: [
         EntityModule,
-        PhysicsModule,
         LLMModule
       ]
     }).compile();

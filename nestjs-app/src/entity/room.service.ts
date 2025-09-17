@@ -366,7 +366,7 @@ export class RoomService {
     if (!this.databaseService) return;
 
     try {
-      await this.databaseService.transaction(async (db) => {
+      this.databaseService.transaction((db) => {
         // Convert IRoom to RoomData format for database
         const roomData: RoomData = {
           id: room.id,
@@ -430,7 +430,7 @@ export class RoomService {
       });
 
       // Save version history
-      await this.databaseService.saveVersion('room', room.id, room, 'room_service', 'Room updated');
+      this.databaseService.saveVersion('room', room.id, room, 'room_service', 'Room updated');
 
     } catch (error) {
       this.logger.error(`Failed to save room ${room.id} to database:`, error);

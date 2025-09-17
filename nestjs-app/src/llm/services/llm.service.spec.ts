@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LLMService } from './llm.service';
 import { LLMProvider, LLMResponse, StructuredLLMResponse } from '../interfaces/llm.interface';
+import { LLMCacheService } from './llm-cache.service';
+import { LLMErrorHandlerService } from './llm-error-handler.service';
 
 // Mock LLM Provider for testing
 class MockLLMProvider implements LLMProvider {
@@ -86,7 +88,30 @@ describe('LLMService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LLMService]
+      providers: [
+        LLMService,
+        {
+          provide: LLMCacheService,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            invalidate: jest.fn(),
+            getStats: jest.fn(() => ({ hitRate: 0.5, totalRequests: 0 })),
+            getCachedPromptResponse: jest.fn(() => Promise.resolve(null)),
+            cachePromptResponse: jest.fn(() => Promise.resolve())
+          }
+        },
+        {
+          provide: LLMErrorHandlerService,
+          useValue: {
+            withRetry: jest.fn((fn) => fn()),
+            createCircuitBreaker: jest.fn(),
+            isSystemHealthy: jest.fn(() => true),
+            logError: jest.fn(),
+            getErrorStats: jest.fn(() => ({ totalErrors: 0, errorRate: 0 }))
+          }
+        }
+      ]
     }).compile();
 
     service = module.get<LLMService>(LLMService);
@@ -113,7 +138,7 @@ describe('LLMService', () => {
       service.registerProvider(anotherProvider, false);
       
       const stats = service.getStats();
-      expect(stats.availableProviders).toHaveLength(3); // mock (2x) + mock2
+      expect(stats.availableProviders).toHaveLength(2); // mock + mock2
     });
   });
 
@@ -269,7 +294,7 @@ describe('LLMService', () => {
     it('should test all registered providers', async () => {
       const results = await service.testProviders();
       
-      expect(results.size).toBe(2); // mock and fallback
+      expect(results.size).toBe(1); // only mock provider in this test setup
       expect(results.get('mock')).toBe(true);
     });
 

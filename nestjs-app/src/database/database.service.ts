@@ -313,7 +313,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   // Transaction management
-  async transaction<T>(callback: (db: Database.Database) => T): Promise<T> {
+  transaction<T>(callback: (db: Database.Database) => T): T {
     const wrappedCallback = () => callback(this.database);
     const transaction = this.database.transaction(wrappedCallback);
     return transaction();
@@ -329,13 +329,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   // Version management methods
-  async saveVersion<T>(
+  saveVersion<T>(
     entityType: string,
     entityId: string,
     data: T,
     changedBy?: string,
     changeReason?: string
-  ): Promise<number> {
+  ): number {
     // Get current max version for this entity
     const maxVersionResult = this.database
       .prepare('SELECT COALESCE(MAX(version_number), 0) as max_version FROM version_history WHERE entity_type = ? AND entity_id = ?')
@@ -430,7 +430,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Create a new version entry for the rollback
-    await this.saveVersion(
+    this.saveVersion(
       entityType,
       entityId,
       versionData,

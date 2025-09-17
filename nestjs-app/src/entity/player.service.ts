@@ -148,13 +148,17 @@ export class PlayerService {
   }
   
   updatePlayer(
-    id: string, 
+    id: string,
     updates: Partial<Omit<IPlayer, 'id' | 'type'>>
   ): boolean {
     const player = this.getPlayer(id);
     if (!player) return false;
-    
-    // Update the entity
+
+    // Update local cache first
+    Object.assign(player, updates);
+    this.players.set(id, player);
+
+    // Update the entity service
     return this.entityService.updateEntity(id, {
       ...updates,
       type: 'player'
@@ -583,7 +587,7 @@ export class PlayerService {
     if (!this.databaseService) return;
 
     try {
-      await this.databaseService.transaction(async (db) => {
+      this.databaseService.transaction((db) => {
         // Convert IPlayer to NPCData format for database
         const playerData: NPCData = {
           id: player.id,
@@ -620,7 +624,7 @@ export class PlayerService {
       });
 
       // Save version history
-      await this.databaseService.saveVersion('player', player.id, player, 'player_service', 'Player updated');
+      this.databaseService.saveVersion('player', player.id, player, 'player_service', 'Player updated');
 
     } catch (error) {
       this.logger.error(`Failed to save player ${player.id} to database:`, error);

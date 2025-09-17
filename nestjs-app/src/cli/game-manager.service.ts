@@ -60,7 +60,7 @@ export class GameManagerService {
       };
 
       // Save to database
-      await this.databaseService.transaction(async (db) => {
+      this.databaseService.transaction((db) => {
         const insertGame = db.prepare(`
           INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
           VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -114,7 +114,7 @@ export class GameManagerService {
       const gameConfig = {
         id: gameId,
         name: gameId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        description: `A Quest Weaver adventure game`,
+        description: `A Quest Weaver's Essential Guide adventure game`,
         version: 1,
         connections: {}
       };

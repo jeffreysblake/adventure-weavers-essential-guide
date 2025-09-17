@@ -7,9 +7,10 @@ import { EntityModule } from '../entity/entity.module';
 import { RoomModule } from '../entity/room.module';
 import { PlayerModule } from '../entity/player.module';
 import { ObjectModule } from '../entity/object.module';
+import { DatabaseModule } from '../database/database.module';
 
 @Module({
-  imports: [EntityModule, RoomModule, PlayerModule, ObjectModule],
+  imports: [DatabaseModule, EntityModule, RoomModule, PlayerModule, ObjectModule],
   controllers: [GameController],
   providers: [GameService, GameStateService, CommandProcessorService],
   exports: [GameService, GameStateService]

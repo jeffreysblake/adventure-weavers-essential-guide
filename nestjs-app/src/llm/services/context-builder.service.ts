@@ -666,7 +666,7 @@ export class ContextBuilderService {
     return {
       gameInfo: {
         id: gameId || 'default',
-        name: 'Quest Weaver Game',
+        name: 'The Quest Weaver\'s Essential Guide Game',
         theme: 'fantasy',
         genre: 'adventure',
         description: 'A dynamic text-based adventure game',

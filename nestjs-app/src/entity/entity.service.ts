@@ -217,7 +217,7 @@ export class EntityService {
 
     // This is a generic save - specific services will handle their own table schemas
     // For now, we'll save to version history for tracking
-    await this.databaseService.saveVersion(
+    this.databaseService.saveVersion(
       this.getEntityType(entity),
       entity.id,
       entity,

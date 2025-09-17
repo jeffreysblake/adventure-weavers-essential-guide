@@ -229,14 +229,34 @@ export class NPCGeneratorService {
     request: NPCGenerationRequest,
     context: any
   ): Promise<GeneratedNPCContent> {
+    // Handle personality as either string or array
+    let personalityStr = 'generate appropriate personality';
+    if (request.personality) {
+      if (Array.isArray(request.personality)) {
+        personalityStr = request.personality.join(', ');
+      } else {
+        personalityStr = request.personality as string;
+      }
+    }
+
+    // Handle skills as either string or array
+    let skillsStr = 'generate appropriate skills';
+    if (request.skills) {
+      if (Array.isArray(request.skills)) {
+        skillsStr = request.skills.join(', ');
+      } else {
+        skillsStr = request.skills as any;
+      }
+    }
+
     const prompt = await this.promptTemplateService.renderTemplate('npc_generation', {
       name: request.name || 'generate appropriate name',
       role: request.role || 'villager',
-      personality: request.personality?.join(', ') || 'generate appropriate personality',
+      personality: personalityStr,
       backstory: request.backstory || 'create interesting backstory',
       level: (request.level || 1).toString(),
       alignment: request.alignment || 'neutral',
-      skills: request.skills?.join(', ') || 'generate appropriate skills',
+      skills: skillsStr,
       roomDescription: context.room?.description || 'unknown location',
       existingNPCs: context.existingNPCs?.map((npc: any) => npc.name).join(', ') || 'none',
       relationships: context.relatedNPCs?.map((npc: any) => `${npc.name} (${npc.relationship})`).join(', ') || 'none'

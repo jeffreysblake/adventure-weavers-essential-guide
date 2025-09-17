@@ -24,7 +24,7 @@ export class CLIService {
   private setupCommands(): void {
     this.program
       .name('quest-weaver')
-      .description('Quest Weaver Game Engine CLI')
+      .description('The Quest Weaver\'s Essential Guide Game Engine CLI')
       .version('1.0.0');
 
     // Game management commands

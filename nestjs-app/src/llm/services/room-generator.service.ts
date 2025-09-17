@@ -160,15 +160,17 @@ export class RoomGeneratorService {
     context: any
   ): Promise<GeneratedRoomContent> {
     const prompt = await this.promptTemplateService.renderTemplate('room_description', {
-      theme: request.theme || 'fantasy',
-      style: request.style || 'fantasy',
-      size: request.size || 'medium',
-      purpose: request.purpose || 'exploration',
-      connectedRooms: context.connectedRooms?.map((r: any) => r.name).join(', ') || 'none',
-      requiredObjects: request.requiredObjects?.join(', ') || 'none',
-      ambiance: request.ambiance || 'mysterious',
-      dangerLevel: request.dangerLevel || 1,
-      worldContext: `World has ${context.worldState.existingRooms} rooms and ${context.worldState.totalObjects} objects`
+      room_name: context.generatedName || `${request.theme || 'Mystery'} ${request.purpose || 'Chamber'}`,
+      room_type: request.purpose || 'chamber',
+      room_size: request.size || 'medium',
+      room_theme: `${request.style || 'fantasy'} ${request.theme || 'mysterious'}`,
+      game_theme: request.style || 'fantasy',
+      objects_list: request.requiredObjects?.join(', ') || 'various items',
+      connected_rooms: context.connectedRooms?.map((r: any) => r.name).join(', ') || 'other areas',
+      time_of_day: 'day',
+      lighting: context.lighting || 'well-lit',
+      narrative_style: 'descriptive',
+      description_length: 'detailed'
     });
 
     const schema = this.getRoomContentSchema();

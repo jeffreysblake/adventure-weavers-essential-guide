@@ -8,7 +8,7 @@ import { EntityService } from '../entity/entity.service';
 import { RoomService } from '../entity/room.service';
 import { ObjectService } from '../entity/object.service';
 import { PlayerService } from '../entity/player.service';
-import { PhysicsService } from '../physics/physics.service';
+import { PhysicsService } from '../entity/physics.service';
 import * as fs from 'fs';
 import * as path from 'path';
 

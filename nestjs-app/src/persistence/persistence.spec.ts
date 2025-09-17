@@ -39,7 +39,7 @@ describe('Persistence System Integration', () => {
     it('should save and retrieve version history', async () => {
       const testData = { name: 'Test Room', description: 'A test room' };
       
-      const version = await databaseService.saveVersion(
+      const version = databaseService.saveVersion(
         'room',
         'test-room-1',
         testData,

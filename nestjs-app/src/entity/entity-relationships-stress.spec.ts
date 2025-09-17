@@ -4,7 +4,7 @@ import { RoomService } from './room.service';
 import { ObjectService } from './object.service';
 import { PlayerService } from './player.service';
 import { DatabaseService } from '../database/database.service';
-import { PhysicsService } from '../physics/physics.service';
+import { PhysicsService } from './physics.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -17,7 +17,8 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
   let testDbPath: string;
 
   beforeEach(async () => {
-    testDbPath = path.join(__dirname, '../../entity-stress-test.db');
+    const testId = Math.random().toString(36).substring(7);
+    testDbPath = path.join(__dirname, `../../entity-stress-test-${testId}.db`);
     if (fs.existsSync(testDbPath)) {
       fs.unlinkSync(testDbPath);
     }
@@ -55,6 +56,20 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
     it('should detect and prevent room → object → room cycles', async () => {
       const gameId = 'circular-test-game';
 
+      // Clean up any existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create game record first to satisfy foreign key constraints
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Circular Test Game', 'Test game for circular dependencies', 1, now, now, 1);
+
       // Create two rooms
       const room1 = roomService.createRoom({
         gameId,
@@ -83,23 +98,19 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
       });
 
       // Place container in room1
-      const placeResult1 = await roomService.placeObjectInRoom(room1.id, container.id);
-      expect(placeResult1.success).toBe(true);
+      const placeResult1 = roomService.addObjectToRoom(room1.id, container.id);
+      expect(placeResult1).toBe(true);
 
       // Try to create a circular dependency by having the container "contain" room2
       // This should be prevented by the system
       try {
-        const circularResult = await objectService.placeObjectInContainer(
-          container.id, 
-          room2.id, // Trying to put a room inside an object
-          'inside'
-        );
-        
-        // If the system allows this, it should at least detect the circular nature
-        if (circularResult.success) {
-          expect(circularResult.message).toContain('circular') || 
-          expect(circularResult.message).toContain('invalid');
-        }
+        const circularResult = objectService.placeObject(room2.id, {
+          targetId: container.id,
+          relationshipType: 'inside'
+        });
+
+        // The placement should fail (return false) because it's invalid to put a room inside an object
+        expect(circularResult).toBe(false);
       } catch (error) {
         // It's acceptable for this to throw an error preventing the circular dependency
         expect(error.message).toMatch(/(circular|invalid|forbidden)/i);
