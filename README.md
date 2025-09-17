@@ -2,7 +2,7 @@
 
 ![Quest Weaver CLI](quest_weaver_cli.png)
 
-## The Story Behind The Quest Weaver
+## The Story Behind Quest Weaver
 
 This project began during a period of remote work where I found myself traveling for several months, missing the joy of reading stories aloud to my nephews every week. As a child, I had countless adventures with text-based games that sparked my imagination and creativity. Wanting to recreate those experiences for my own nephews, I drew inspiration from Neal Stephenson's "The Diamond Age: Or, A Young Lady's Illustrated Primer" - a work that explores how interactive narratives can be crafted through technology.
 
