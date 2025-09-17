@@ -143,27 +143,27 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
 
       // Nest them: container[0] contains container[1], etc.
       for (let i = 0; i < maxDepth - 1; i++) {
-        const result = await objectService.placeObjectInContainer(
-          containers[i].id,
+        const result = objectService.placeObject(
           containers[i + 1].id,
-          'inside'
+          {
+            targetId: containers[i].id,
+            relationshipType: 'inside'
+          }
         );
-        expect(result.success).toBe(true);
+        expect(result).toBe(true);
       }
 
       // Try to create a circular dependency by putting container[0] inside the last container
-      const circularAttempt = await objectService.placeObjectInContainer(
-        containers[maxDepth - 1].id,
+      const circularAttempt = objectService.placeObject(
         containers[0].id,
-        'inside'
+        {
+          targetId: containers[maxDepth - 1].id,
+          relationshipType: 'inside'
+        }
       );
 
-      // Should either fail or detect the circular dependency
-      if (circularAttempt.success) {
-        expect(circularAttempt.message).toMatch(/(circular|cycle|loop)/i);
-      } else {
-        expect(circularAttempt.message).toMatch(/(circular|cycle|loop|forbidden)/i);
-      }
+      // Should fail to detect the circular dependency
+      expect(circularAttempt).toBe(false);
 
       // Verify no circular dependency was actually created
       const lastContainer = objectService.getObject(containers[maxDepth - 1].id);
@@ -199,21 +199,17 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
       });
 
       // Create spatial relationships: obj1 on_top_of obj2, obj2 on_top_of obj3
-      const rel1 = await objectService.createSpatialRelationship(obj1.id, obj2.id, 'on_top_of');
-      expect(rel1.success).toBe(true);
+      const rel1 = objectService.placeObject(obj1.id, { targetId: obj2.id, relationshipType: 'on_top_of' });
+      expect(rel1).toBe(true);
 
-      const rel2 = await objectService.createSpatialRelationship(obj2.id, obj3.id, 'on_top_of');
-      expect(rel2.success).toBe(true);
+      const rel2 = objectService.placeObject(obj2.id, { targetId: obj3.id, relationshipType: 'on_top_of' });
+      expect(rel2).toBe(true);
 
       // Try to create circular relationship: obj3 on_top_of obj1
-      const circularRel = await objectService.createSpatialRelationship(obj3.id, obj1.id, 'on_top_of');
-      
+      const circularRel = objectService.placeObject(obj3.id, { targetId: obj1.id, relationshipType: 'on_top_of' });
+
       // Should detect and prevent the circular dependency
-      if (circularRel.success) {
-        expect(circularRel.message).toMatch(/(circular|cycle|invalid)/i);
-      } else {
-        expect(circularRel.message).toMatch(/(circular|cycle|forbidden)/i);
-      }
+      expect(circularRel).toBe(false);
     });
 
     it('should handle player-object-room relationship cycles', async () => {
@@ -260,15 +256,15 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
       // Try to create a cycle where the portable room "contains" the original room
       // This should be detected and prevented
       try {
-        const cycleAttempt = await objectService.placeObjectInContainer(
-          portableRoom.id,
+        const cycleAttempt = objectService.placeObject(
           room.id,
-          'inside'
+          {
+            targetId: portableRoom.id,
+            relationshipType: 'inside'
+          }
         );
 
-        if (cycleAttempt.success) {
-          expect(cycleAttempt.message).toMatch(/(invalid|impossible|circular)/i);
-        }
+        expect(cycleAttempt).toBe(false);
       } catch (error) {
         expect(error.message).toMatch(/(invalid|circular|forbidden)/i);
       }
@@ -332,7 +328,7 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
 
       // Try to add player ID to objects list (type mismatch)
       try {
-        const invalidAdd = await roomService.placeObjectInRoom(room.id, player.id);
+        const invalidAdd = await roomService.addObjectToRoom(room.id, player.id);
         if (invalidAdd.success) {
           expect(invalidAdd.message).toMatch(/(warning|type|mismatch)/i);
         } else {
@@ -389,15 +385,17 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
       let capacityExceeded = false;
 
       for (const item of items) {
-        const result = await objectService.placeObjectInContainer(
-          smallBox.id,
+        const result = objectService.placeObject(
           item.id,
-          'inside'
+          {
+            targetId: smallBox.id,
+            relationshipType: 'inside'
+          }
         );
 
-        if (result.success) {
+        if (result) {
           successCount++;
-        } else if (result.message.match(/(capacity|full|space)/i)) {
+        } else {
           capacityExceeded = true;
         }
       }
@@ -489,7 +487,7 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
       let successfulPlacements = 0;
 
       for (const obj of objects) {
-        const result = await roomService.placeObjectInRoom(room.id, obj.id);
+        const result = await roomService.addObjectToRoom(room.id, obj.id);
         if (result.success) {
           successfulPlacements++;
         }
@@ -535,12 +533,14 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
 
       // Nest them deeply
       for (let i = 0; i < depth - 1; i++) {
-        const result = await objectService.placeObjectInContainer(
-          containers[i].id,
+        const result = objectService.placeObject(
           containers[i + 1].id,
-          'inside'
+          {
+            targetId: containers[i].id,
+            relationshipType: 'inside'
+          }
         );
-        expect(result.success).toBe(true);
+        expect(result).toBe(true);
       }
 
       // Test traversal performance
@@ -605,7 +605,7 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
       // Place all entities in room1
       for (const { type, entity } of entities) {
         if (type === 'object') {
-          await roomService.placeObjectInRoom(room1.id, entity.id);
+          await roomService.addObjectToRoom(room1.id, entity.id);
         } else {
           await roomService.placePlayerInRoom(room1.id, entity.id);
         }
@@ -678,10 +678,12 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
 
         // Create various relationships
         const relationshipType = ['on_top_of', 'next_to', 'attached_to'][i % 3];
-        await objectService.createSpatialRelationship(
-          obj.id, 
-          centralObject.id, 
-          relationshipType as any
+        objectService.placeObject(
+          obj.id,
+          {
+            targetId: centralObject.id,
+            relationshipType: relationshipType as any
+          }
         );
       }
 
@@ -735,10 +737,12 @@ describe('Entity Relationship Edge Cases Stress Tests', () => {
       for (let i = 0; i < numNodes; i++) {
         for (let j = 1; j <= connectionsPerNode; j++) {
           const targetIndex = (i + j) % numNodes;
-          await objectService.createSpatialRelationship(
+          objectService.placeObject(
             entities[i].id,
-            entities[targetIndex].id,
-            'next_to'
+            {
+              targetId: entities[targetIndex].id,
+              relationshipType: 'next_to'
+            }
           );
         }
       }

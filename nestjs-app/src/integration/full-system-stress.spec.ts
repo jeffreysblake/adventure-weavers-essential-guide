@@ -28,9 +28,9 @@ describe('Full System Integration Stress Tests', () => {
   let testGamesDir: string;
 
   beforeEach(async () => {
-    testDbPath = path.join(__dirname, '../../integration-stress-test.db');
-    testGamesDir = path.join(__dirname, '../../integration-test-games');
-    
+    testDbPath = path.join(__dirname, '../../integration-stress-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '.db');
+    testGamesDir = path.join(__dirname, '../../integration-test-games-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9));
+
     // Clean up existing test files
     if (fs.existsSync(testDbPath)) {
       fs.unlinkSync(testDbPath);
@@ -84,13 +84,27 @@ describe('Full System Integration Stress Tests', () => {
 
   describe('Complete Game Lifecycle Stress Tests', () => {
     it('should handle end-to-end game creation, play, and persistence', async () => {
-      const gameId = 'e2e-stress-game';
-      
+      const gameId = 'e2e-stress-game-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
       console.log('🎮 Starting end-to-end game lifecycle test...');
-      
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
+
       // Phase 1: Game Creation
       const creationStart = Date.now();
-      
+
       // Create multiple interconnected rooms
       const rooms = [];
       for (let i = 0; i < 20; i++) {
@@ -367,10 +381,24 @@ describe('Full System Integration Stress Tests', () => {
     }, 90000); // 90 second timeout for full test
 
     it('should handle complex multi-player adventure scenarios', async () => {
-      const gameId = 'multiplayer-adventure';
-      
+      const gameId = 'multiplayer-adventure-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
       console.log('👥 Starting multiplayer adventure scenario...');
-      
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
+
       // Create adventure world
       const dungeon = roomService.createRoom({
         gameId,
@@ -700,17 +728,31 @@ describe('Full System Integration Stress Tests', () => {
     }, 60000);
 
     it('should handle persistent world simulation with time-based events', async () => {
-      const gameId = 'persistent-world';
-      
+      const gameId = 'persistent-world-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
       console.log('🌍 Starting persistent world simulation...');
-      
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
+
       // Create a living world
       const worldStart = Date.now();
-      
+
       // Create multiple settlements
       const settlements = [];
       const settlementNames = ['Rivertown', 'Mountain Keep', 'Forest Glade', 'Desert Oasis', 'Coastal Port'];
-      
+
       for (let i = 0; i < settlementNames.length; i++) {
         const settlement = roomService.createRoom({
           gameId,
@@ -908,9 +950,23 @@ describe('Full System Integration Stress Tests', () => {
   describe('System Stability Under Load', () => {
     it('should maintain stability during prolonged operation', async () => {
       console.log('🔧 Starting prolonged stability test...');
-      
+
       const stabilityStart = Date.now();
-      const gameId = 'stability-test';
+      const gameId = 'stability-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
       
       // Track memory usage
       const initialMemory = process.memoryUsage();

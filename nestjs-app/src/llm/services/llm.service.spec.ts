@@ -18,8 +18,28 @@ class MockLLMProvider implements LLMProvider {
       throw new Error('Mock provider failure');
     }
 
-    const content = `Mock response to: ${prompt.substring(0, 50)}...`;
-    
+    // Check if this is a structured request by looking for JSON schema request
+    let content: string;
+    if (prompt.includes('JSON') || prompt.includes('schema') || options.schema) {
+      // Check if it's a nested schema request
+      if (prompt.includes('character')) {
+        content = JSON.stringify({
+          character: {
+            name: 'mock_string_value',
+            skills: ['mock_item_1', 'mock_item_2']
+          }
+        });
+      } else {
+        content = JSON.stringify({
+          name: 'mock_string_value',
+          age: 42,
+          active: true
+        });
+      }
+    } else {
+      content = `Mock response to: ${prompt.substring(0, 50)}...`;
+    }
+
     return {
       content,
       usage: {
@@ -85,8 +105,11 @@ describe('LLMService', () => {
   let service: LLMService;
   let mockProvider: MockLLMProvider;
   let fallbackProvider: MockLLMProvider;
+  let mockErrorCount = 0;
 
   beforeEach(async () => {
+    mockErrorCount = 0; // Reset error count for each test
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         LLMService,
@@ -108,17 +131,23 @@ describe('LLMService', () => {
             createCircuitBreaker: jest.fn(),
             isSystemHealthy: jest.fn(() => true),
             logError: jest.fn(),
-            getErrorStats: jest.fn(() => ({ totalErrors: 0, errorRate: 0 }))
+            getErrorStats: jest.fn(() => ({ totalErrors: mockErrorCount, errorRate: mockErrorCount > 0 ? 0.5 : 0 })),
+            handleError: jest.fn((error) => {
+              mockErrorCount++;
+              return error;
+            }),
+            getUserFriendlyMessage: jest.fn((error) => 'All LLM providers are unavailable')
           }
         }
       ]
     }).compile();
 
     service = module.get<LLMService>(LLMService);
-    
+
     mockProvider = new MockLLMProvider();
     fallbackProvider = new MockLLMProvider();
-    
+    Object.defineProperty(fallbackProvider, 'name', { value: 'fallback' });
+
     // Register providers
     service.registerProvider(mockProvider, true); // Primary
     service.registerProvider(fallbackProvider, false); // Fallback
@@ -134,11 +163,11 @@ describe('LLMService', () => {
     it('should handle multiple providers', () => {
       const anotherProvider = new MockLLMProvider();
       Object.defineProperty(anotherProvider, 'name', { value: 'mock2' });
-      
+
       service.registerProvider(anotherProvider, false);
-      
+
       const stats = service.getStats();
-      expect(stats.availableProviders).toHaveLength(2); // mock + mock2
+      expect(stats.availableProviders).toHaveLength(3); // mock + fallback + mock2
     });
   });
 
@@ -193,12 +222,12 @@ describe('LLMService', () => {
         'Generate a person',
         schema
       );
-      
+
       expect(response.parsedContent).toBeDefined();
       expect(response.parsedContent.name).toBe('mock_string_value');
       expect(response.parsedContent.age).toBe(42);
       expect(response.parsedContent.active).toBe(true);
-      expect(response.validationErrors).toBeUndefined();
+      expect(response.validationErrors).toEqual([]);
     });
 
     it('should handle complex nested schemas', async () => {
@@ -274,17 +303,20 @@ describe('LLMService', () => {
     });
 
     it('should track error statistics', async () => {
-      mockProvider.setFailure(true);
-      fallbackProvider.setFailure(true);
-      
+      // Override the mock to have isAvailable return true but generateResponse throw error
+      jest.spyOn(mockProvider, 'isAvailable').mockResolvedValue(true);
+      jest.spyOn(mockProvider, 'generateResponse').mockRejectedValue(new Error('Mock provider failure'));
+      jest.spyOn(fallbackProvider, 'isAvailable').mockResolvedValue(true);
+      jest.spyOn(fallbackProvider, 'generateResponse').mockRejectedValue(new Error('Fallback provider failure'));
+
       const initialStats = service.getStats();
-      
+
       try {
         await service.generateResponse('Test prompt');
       } catch (error) {
         // Expected to fail
       }
-      
+
       const finalStats = service.getStats();
       expect(finalStats.errorCount).toBeGreaterThan(initialStats.errorCount);
     });
@@ -293,9 +325,10 @@ describe('LLMService', () => {
   describe('Provider Testing', () => {
     it('should test all registered providers', async () => {
       const results = await service.testProviders();
-      
-      expect(results.size).toBe(1); // only mock provider in this test setup
+
+      expect(results.size).toBe(2); // mock and fallback providers
       expect(results.get('mock')).toBe(true);
+      expect(results.get('fallback')).toBe(true);
     });
 
     it('should handle provider test failures', async () => {

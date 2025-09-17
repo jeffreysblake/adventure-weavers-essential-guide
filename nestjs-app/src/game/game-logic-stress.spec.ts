@@ -18,7 +18,7 @@ describe('Game Logic Stress Tests', () => {
   let testDbPath: string;
 
   beforeEach(async () => {
-    testDbPath = path.join(__dirname, '../../game-logic-stress-test.db');
+    testDbPath = path.join(__dirname, '../../game-logic-stress-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '.db');
     if (fs.existsSync(testDbPath)) {
       fs.unlinkSync(testDbPath);
     }
@@ -55,7 +55,21 @@ describe('Game Logic Stress Tests', () => {
 
   describe('Player Interaction Stress Tests', () => {
     it('should handle rapid action sequences (100+ actions per second)', async () => {
-      const gameId = 'rapid-actions-test';
+      const gameId = 'rapid-actions-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Create test environment
       const room = roomService.createRoom({
@@ -158,7 +172,21 @@ describe('Game Logic Stress Tests', () => {
     }, 10000);
 
     it('should handle complex magic spell chains and cascading effects', async () => {
-      const gameId = 'magic-chains-test';
+      const gameId = 'magic-chains-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Create magical test environment
       const room = roomService.createRoom({
@@ -246,7 +274,21 @@ describe('Game Logic Stress Tests', () => {
     }, 15000);
 
     it('should handle massive inventory management (1000+ items)', async () => {
-      const gameId = 'inventory-stress-test';
+      const gameId = 'inventory-stress-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       const player = playerService.createPlayer({
         gameId,
@@ -324,7 +366,21 @@ describe('Game Logic Stress Tests', () => {
     }, 20000);
 
     it('should handle complex physics interactions under load', async () => {
-      const gameId = 'physics-stress-test';
+      const gameId = 'physics-stress-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Create physics world with many objects
       const room = roomService.createRoom({
@@ -414,7 +470,21 @@ describe('Game Logic Stress Tests', () => {
 
   describe('Spatial System Stress Tests', () => {
     it('should handle dense entity placement (500+ entities per coordinate)', async () => {
-      const gameId = 'dense-placement-test';
+      const gameId = 'dense-placement-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       const room = roomService.createRoom({
         gameId,
@@ -482,7 +552,21 @@ describe('Game Logic Stress Tests', () => {
     }, 20000);
 
     it('should handle large world coordinates efficiently', async () => {
-      const gameId = 'large-coords-test';
+      const gameId = 'large-coords-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Test with very large coordinate values
       const extremeCoords = [
@@ -538,7 +622,21 @@ describe('Game Logic Stress Tests', () => {
     });
 
     it('should handle rapid teleportation efficiently', async () => {
-      const gameId = 'teleport-test';
+      const gameId = 'teleport-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Create multiple rooms
       const rooms = [];
@@ -631,7 +729,21 @@ describe('Game Logic Stress Tests', () => {
 
   describe('State Management Stress Tests', () => {
     it('should handle complex object states (50+ properties)', async () => {
-      const gameId = 'complex-state-test';
+      const gameId = 'complex-state-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Create objects with many state properties
       const complexObjects = [];
@@ -727,7 +839,21 @@ describe('Game Logic Stress Tests', () => {
     }, 10000);
 
     it('should handle rapid state synchronization across systems', async () => {
-      const gameId = 'sync-test';
+      const gameId = 'sync-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Create entities that need synchronization
       const room = roomService.createRoom({
@@ -811,7 +937,21 @@ describe('Game Logic Stress Tests', () => {
     }, 15000);
 
     it('should handle undo/redo chains efficiently', async () => {
-      const gameId = 'undo-redo-test';
+      const gameId = 'undo-redo-test-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+      // Clean up existing data first
+      databaseService.prepare('DELETE FROM rooms WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM objects WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM npcs WHERE game_id = ?').run(gameId);
+      databaseService.prepare('DELETE FROM games WHERE id = ?').run(gameId);
+
+      // Create the game record first
+      const insertGame = databaseService.prepare(`
+        INSERT INTO games (id, name, description, version, created_at, updated_at, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = new Date().toISOString();
+      insertGame.run(gameId, 'Stress Test Game', 'Test game description', 1, now, now, 1);
 
       // Create test objects
       const objects = [];

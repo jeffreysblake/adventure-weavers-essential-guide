@@ -4,6 +4,7 @@ import { ObjectService } from './object.service';
 import { PlayerService } from './player.service';
 import { RoomService } from './room.service';
 import { PhysicsService } from './physics.service';
+import { DatabaseService } from '../database/database.service';
 
 describe('Physics Persistence Tests', () => {
   let entityService: EntityService;
@@ -15,6 +16,7 @@ describe('Physics Persistence Tests', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        DatabaseService,
         EntityService,
         ObjectService,
         PlayerService,
