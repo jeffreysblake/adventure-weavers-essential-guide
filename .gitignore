@@ -173,3 +173,11 @@ config/production.json
 progress.md
 .roo/
 example-usage.md
+
+# Database files - these can get very large and should not be committed
+nestjs-app/data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
